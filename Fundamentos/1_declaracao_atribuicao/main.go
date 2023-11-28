@@ -28,4 +28,6 @@ func main() {
 	println("---- VAR ESCOPO LOCAL: SHORTHAND ASSIGNMENT ----")
 	h := "Shorthand Assignment"
 	println(h)
+	println("---- VAR ESCOPO PACKAGE ----")
+	println(soma)
 }
