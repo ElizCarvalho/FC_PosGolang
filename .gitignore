@@ -134,3 +134,10 @@ fabric.properties
 
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Go
 
+/.idea/.gitignore
+/.scannerwork/.sonar_lock
+/.idea/FC_PosGolang.iml
+/.idea/modules.xml
+/qodana.yaml
+/.scannerwork/report-task.txt
+/.idea/vcs.xml
