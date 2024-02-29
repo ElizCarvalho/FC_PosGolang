@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cursos</title>
+</head>
+<body>
+    <h1>Cursos</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Carga Horária</th>
+            </tr>
+        </thead>
+        <tbody>
+        {{ range . }}
+            {{ if eq .CargaHoraria 80 }}
+                <tr>
+                    <td>{{ .Nome }}</td>
+                    <td>{{ .CargaHoraria }}</td>
+                </tr>
+            {{ end }}
+        {{ end }}
+        </tbody>
+    </table>
+</body>
+</html>
