@@ -53,6 +53,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("Produto inserido com sucesso")
 	product.PrintWithSeparator()
 
 	product.Price = 879.90
@@ -60,24 +61,28 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("Produto atualizado com sucesso")
 	product.PrintWithSeparator()
 
 	product, err = selectProduct(db, product.ID)
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("Produto selecionado com sucesso")
 	product.PrintWithSeparator()
 
 	products, err := selectAllProducts(db)
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("Produtos selecionados com sucesso")
 	printProducts(products)
 
 	err = deleteProduct(db, product.ID)
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("Produto deletado com sucesso")
 }
 
 // Função para inserir um produto
