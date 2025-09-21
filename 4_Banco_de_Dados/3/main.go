@@ -100,5 +100,17 @@ func main() {
 			fmt.Println("- ", flight.Name, flight.SerialNumber.Name)
 		}
 	}
+	//buscar todas as labels com os voos relacionados
+	var labels []Labels
+	err = db.Model(&Labels{}).Preload("Flights").Find(&labels).Error
+	if err != nil {
+		panic(err)
+	}
+	for _, label := range labels {
+		fmt.Println(label.Name, "->")
+		for _, flight := range label.Flights {
+			fmt.Println("- ", flight.Name)
+		}
+	}
 
 }
