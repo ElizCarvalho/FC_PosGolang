@@ -70,14 +70,14 @@ func main() {
 
 	//buscar todas as categorias com os voos relacionados
 	var categories []Category
-	err = db.Model(&Category{}).Preload("Flights").Find(&categories).Error
+	err = db.Model(&Category{}).Preload("Flights").Preload("Flights.SerialNumber").Find(&categories).Error
 	if err != nil {
 		panic(err)
 	}
 	for _, category := range categories {
 		fmt.Println(category.Name, "->")
 		for _, flight := range category.Flights {
-			fmt.Println("- ", flight.Name)
+			fmt.Println("- ", flight.Name, flight.SerialNumber.Name)
 		}
 	}
 
