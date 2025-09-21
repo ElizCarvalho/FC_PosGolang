@@ -44,4 +44,35 @@ func main() {
 	fmt.Println("Selecionando todos os voos")
 	db.Debug().Find(&flights)
 	fmt.Println(flights)
+
+	//busca com limit
+	fmt.Println("Selecionando 2 voos")
+	db.Debug().Limit(2).Find(&flights)
+	fmt.Println(flights)
+
+	//busca com offset (paginação)
+	fmt.Println("Selecionando 2 voos a partir do 2")
+	db.Debug().Offset(2).Limit(2).Find(&flights)
+	fmt.Println(flights)
+
+	//busca com where
+	fmt.Println("Selecionando voos com preço maior que 100")
+	db.Debug().Where("price > ?", 100).Find(&flights)
+	fmt.Println(flights)
+
+	//busca com like
+	fmt.Println("Selecionando voos com nome começando com B")
+	db.Debug().Where("name LIKE ?", "B%").Find(&flights)
+	fmt.Println(flights)
+
+	//busca com where e AND
+	fmt.Println("Selecionando voos com preço maior que 100 e menor que 300")
+	db.Debug().Where("price > ? AND price < ?", 100, 300).Find(&flights)
+	fmt.Println(flights)
+
+	//busca com where e OR
+	fmt.Println("Selecionando voos com preço maior que 100 ou menor que 300")
+	db.Debug().Where("price > ? OR price < ?", 100, 300).Find(&flights)
+	fmt.Println(flights)
+
 }
