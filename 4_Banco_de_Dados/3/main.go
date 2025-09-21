@@ -8,6 +8,12 @@ import (
 	"gorm.io/gorm"
 )
 
+type Labels struct {
+	ID      int `gorm:"primaryKey"`
+	Name    string
+	Flights []Flight `gorm:"many2many:flights_labels;"` //relacionamento many to many
+}
+
 type SerialNumber struct {
 	ID       int `gorm:"primaryKey"`
 	Name     string
@@ -25,8 +31,9 @@ type Flight struct {
 	Name         string
 	Price        float64
 	CategoryID   int          //foreign key
-	Category     Category     //relacionamento com a categoria
-	SerialNumber SerialNumber //relacionamento com o serial number
+	Category     Category     //relacionamento com a categoria has one
+	SerialNumber SerialNumber //relacionamento com o serial number has one
+	Labels       []Labels     `gorm:"many2many:flights_labels;"` //relacionamento many to many
 	gorm.Model                //ID, CreatedAt, UpdatedAt, DeletedAt gerenciados pelo GORM
 }
 
@@ -60,6 +67,19 @@ func main() {
 	db.Create(&SerialNumber{Name: "123456", FlightID: 1})
 	db.Create(&SerialNumber{Name: "789012", FlightID: 2})
 	db.Create(&SerialNumber{Name: "345678", FlightID: 3})
+
+	//criar label
+	label1 := Labels{Name: "Promocao"}
+	label2 := Labels{Name: "Black Friday"}
+	label3 := Labels{Name: "Cyber Monday"}
+	db.Create(&label1)
+	db.Create(&label2)
+	db.Create(&label3)
+
+	//criar voo com label
+	db.Create(&Flight{Name: "GIG-BSB", Price: 100, CategoryID: 1, Labels: []Labels{label1}})
+	db.Create(&Flight{Name: "SDU-CON", Price: 200, CategoryID: 2, Labels: []Labels{label2}})
+	db.Create(&Flight{Name: "BRZ-PTG", Price: 300, CategoryID: 3, Labels: []Labels{label3}})
 
 	//buscar todos os voos
 	var flights []Flight
