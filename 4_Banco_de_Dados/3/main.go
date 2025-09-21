@@ -6,6 +6,7 @@ import (
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Labels struct {
@@ -112,5 +113,28 @@ func main() {
 			fmt.Println("- ", flight.Name)
 		}
 	}
+
+	//lock pessimista com select for update em labels
+	//usado quando tem muita concorrencia
+	//lock no banco de dados, bloqueia o banco de dados para outras transações
+	//as transacoes que estao na fila bloquedas esperam o unlock para continuar
+	//é mais seguro, mas tem mais overhead ... usado para ACID
+	//select * from labels where id = 1 for update
+	//GORM sempre vai trabalhar com transaction por padrao
+	tx := db.Begin()
+	var l Labels
+	err = tx.Debug().Clauses(clause.Locking{Strength: "UPDATE"}).Find(&l, 1).Error
+	if err != nil {
+		tx.Rollback()
+		panic(err)
+	}
+	l.Name = "Promocao 3"
+	err = tx.Debug().Save(&l).Error
+	if err != nil {
+		tx.Rollback()
+		panic(err)
+	}
+	tx.Commit()
+	fmt.Println("Label atualizada com sucesso")
 
 }
