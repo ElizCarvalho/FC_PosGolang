@@ -75,4 +75,14 @@ func main() {
 	db.Debug().Where("price > ? OR price < ?", 100, 300).Find(&flights)
 	fmt.Println(flights)
 
+	//atualizar um voo
+	fmt.Println("Atualizando voo com ID 1")
+	db.Debug().Model(&Flight{}).Where("id = ?", 1).Update("price", 150)
+	fmt.Println("Voo atualizado com sucesso")
+
+	//deletar um voo
+	fmt.Println("Deletando voo com ID 2")
+	db.Debug().Delete(&Flight{}, 2)
+	fmt.Println("Voo deletado com sucesso")
+
 }
