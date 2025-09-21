@@ -1,7 +1,11 @@
 package main
 
-import "gorm.io/gorm"
-import "gorm.io/driver/mysql"
+import (
+	"fmt"
+
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+)
 
 type Flight struct {
 	ID    int `gorm:"primaryKey"`
@@ -15,15 +19,29 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	db.AutoMigrate(&Flight{})
+	db.AutoMigrate(&Flight{}) //em ambiente de desenvolvimento
 
 	//criar um novo voo
-	db.Create(&Flight{Name: "BSB-GIG", Price: 350})
+	//db.Create(&Flight{Name: "BSB-GIG", Price: 350})
 
-	flighs := []Flight{
+	//criar em batch
+	/*flighs := []Flight{
 		{Name: "ABC-123", Price: 100},
 		{Name: "DEF-456", Price: 200},
 		{Name: "GHI-789", Price: 300},
 	}
-	db.Create(&flighs)
+	db.Create(&flighs)*/
+
+	//selecionar um voo
+	var flight Flight
+	fmt.Println("Selecionando voo com ID 2")
+	db.Debug().First(&flight, 2)
+	db.First(&flight, "id = ?", 2)
+	fmt.Println(flight)
+
+	//selecionar todos os voos
+	var flights []Flight
+	fmt.Println("Selecionando todos os voos")
+	db.Debug().Find(&flights)
+	fmt.Println(flights)
 }
