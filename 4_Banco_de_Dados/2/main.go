@@ -8,9 +8,10 @@ import (
 )
 
 type Flight struct {
-	ID    int `gorm:"primaryKey"`
-	Name  string
-	Price float64
+	ID         int `gorm:"primaryKey"`
+	Name       string
+	Price      float64
+	gorm.Model //ID, CreatedAt, UpdatedAt, DeletedAt gerenciados pelo GORM
 }
 
 func main() {
@@ -82,7 +83,7 @@ func main() {
 
 	//deletar um voo
 	fmt.Println("Deletando voo com ID 2")
-	db.Debug().Delete(&Flight{}, 2)
+	db.Debug().Delete(&Flight{}, 2) //soft delete pq usei o gorm.Model
 	fmt.Println("Voo deletado com sucesso")
 
 }
