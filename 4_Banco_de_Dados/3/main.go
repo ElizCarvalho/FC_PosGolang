@@ -15,8 +15,9 @@ type SerialNumber struct {
 }
 
 type Category struct {
-	ID   int `gorm:"primaryKey"`
-	Name string
+	ID      int `gorm:"primaryKey"`
+	Name    string
+	Flights []Flight //relacionamento com o voo has many
 }
 
 type Flight struct {
@@ -65,6 +66,19 @@ func main() {
 	db.Debug().Preload("Category").Preload("SerialNumber").Find(&flights) //preload é para buscar a categoria relacionada ao voo
 	for _, flight := range flights {
 		fmt.Println(flight.Name, flight.Price, flight.Category.Name, flight.SerialNumber.Name)
+	}
+
+	//buscar todas as categorias com os voos relacionados
+	var categories []Category
+	err = db.Model(&Category{}).Preload("Flights").Find(&categories).Error
+	if err != nil {
+		panic(err)
+	}
+	for _, category := range categories {
+		fmt.Println(category.Name, "->")
+		for _, flight := range category.Flights {
+			fmt.Println("- ", flight.Name)
+		}
 	}
 
 }
