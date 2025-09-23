@@ -1,5 +1,6 @@
 package math
 
+// nome com letra maiuscula para ser exportada (struct, func, etc)
 type Math struct {
 	A int
 	B int
