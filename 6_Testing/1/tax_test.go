@@ -46,3 +46,19 @@ func BenchmarkCalculateTax2(b *testing.B) {
 		CalculateTax2(500.0)
 	}
 }
+
+// pra rodar o fuzz test usamos o comando $ go test -fuzz=FuzzCalculateTax
+// ou $ go test -fuzz=FuzzCalculateTax -run=^$ (pra rodar apenas o fuzz test)
+// o comando go test -fuzztime=10s vai rodar o fuzz test por 10 segundos
+func FuzzCalculateTax(f *testing.F) {
+	seed := []float64{500, 1000, 2000, 2500}
+	for _, amount := range seed {
+		f.Add(amount)
+	}
+	f.Fuzz(func(t *testing.T, amount float64) {
+		result := CalculateTax(amount)
+		if amount <= 0 && result != 0 {
+			t.Errorf("Received %f but expected 0", result)
+		}
+	})
+}
