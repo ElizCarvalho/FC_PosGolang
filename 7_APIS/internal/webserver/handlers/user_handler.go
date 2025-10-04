@@ -21,6 +21,19 @@ func NewUserHandler(db database.UserInterface) *UserHandler {
 	}
 }
 
+// GetJWT godoc
+// @Summary Get a user JWT
+// @Description Get a user JWT endpoint
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param  request body dto.LoginInput true "user credentials"
+// @Success 200 {object} dto.GetJWTOutput
+// @Failure 400 {object} dto.Error
+// @Failure 401 {object} dto.Error
+// @Failure 404 {object} dto.Error
+// @Failure 500 {object} dto.Error
+// @Router /users/generate_token [post]
 func (h *UserHandler) GetJWT(w http.ResponseWriter, r *http.Request) {
 	jwt := r.Context().Value("jwt").(*jwtauth.JWTAuth)
 	jwtExpiresIn := r.Context().Value("jwtExpiresIn").(int)
@@ -77,14 +90,16 @@ func (h *UserHandler) GetJWT(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param  request body dto.CreateUserInput true "user request"
 // @Success 201 {string} string "User created successfully"
-// @Failure 400 {object} Error
-// @Failure 500 {object} Error
+// @Failure 400 {object} dto.Error
+// @Failure 500 {object} dto.Error
 // @Router /users [post]
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var user dto.CreateUserInput
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		error := dto.Error{Message: err.Error()}
+		json.NewEncoder(w).Encode(error)
 		return
 	}
 
