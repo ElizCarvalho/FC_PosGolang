@@ -7,6 +7,8 @@ import (
 	"github.com/ElizCarvalho/FC_PosGolang/7_APIS/infra/database"
 	"github.com/ElizCarvalho/FC_PosGolang/7_APIS/internal/entity"
 	"github.com/ElizCarvalho/FC_PosGolang/7_APIS/internal/webserver/handlers"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -25,6 +27,11 @@ func main() {
 	productDB := database.NewProductDB(db)
 	productHandler := handlers.NewProductHandler(productDB)
 
-	http.HandleFunc("/products", productHandler.CreateProduct)
-	http.ListenAndServe(":"+config.WebServerPort, nil)
+	r := chi.NewRouter()
+	r.Use(middleware.Logger)
+	r.Post("/products", productHandler.CreateProduct)
+	r.Get("/products/{id}", productHandler.GetProduct)
+	r.Put("/products/{id}", productHandler.UpdateProduct)
+
+	http.ListenAndServe(":"+config.WebServerPort, r)
 }
