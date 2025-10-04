@@ -1,0 +1,22 @@
+basePath: /
+host: localhost:8000
+info:
+  contact:
+    email: elizabethcarvalh0@yahoo.com
+    name: Elizabeth Carvalho
+    url: https://github.com/ElizCarvalho
+  description: API for FC Pos Golang
+  license:
+    name: MIT License
+    url: https://github.com/ElizCarvalho/FC_PosGolang/blob/main/LICENSE
+  termsOfService: http://swagger.io/terms/
+  title: FC Pos Golang API Example
+  version: "1.0"
+paths: {}
+securityDefinitions:
+  ApiKeyAuth:
+    description: JWT token
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

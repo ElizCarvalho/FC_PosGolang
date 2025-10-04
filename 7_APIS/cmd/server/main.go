@@ -5,16 +5,36 @@ import (
 	"net/http"
 
 	"github.com/ElizCarvalho/FC_PosGolang/7_APIS/configs"
+	_ "github.com/ElizCarvalho/FC_PosGolang/7_APIS/docs"
 	"github.com/ElizCarvalho/FC_PosGolang/7_APIS/infra/database"
 	"github.com/ElizCarvalho/FC_PosGolang/7_APIS/internal/entity"
 	"github.com/ElizCarvalho/FC_PosGolang/7_APIS/internal/webserver/handlers"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/jwtauth"
+	httpSwagger "github.com/swaggo/http-swagger"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
+// @title FC Pos Golang API Example
+// @version 1.0
+// @description API for FC Pos Golang
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name Elizabeth Carvalho
+// @contact.email elizabethcarvalh0@yahoo.com
+// @contact.url https://github.com/ElizCarvalho
+
+// @license.name MIT License
+// @license.url https://github.com/ElizCarvalho/FC_PosGolang/blob/main/LICENSE
+
+// @host localhost:8000
+// @BasePath /
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+// @description JWT token
 func main() {
 	config, err := configs.LoadConfig(".")
 	if err != nil {
@@ -52,6 +72,10 @@ func main() {
 		r.Post("/", userHandler.CreateUser)
 		r.Post("/generate_token", userHandler.GetJWT)
 	})
+
+	//swaggerURL := "http://localhost" + config.WebServerPort + "/docs/doc.json"
+	//r.Get("/docs/*", httpSwagger.Handler(httpSwagger.URL(swaggerURL)))
+	r.Get("/docs/*", httpSwagger.Handler())
 
 	http.ListenAndServe(":"+config.WebServerPort, r)
 }
