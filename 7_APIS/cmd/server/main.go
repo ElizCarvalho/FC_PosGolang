@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/ElizCarvalho/FC_PosGolang/7_APIS/configs"
@@ -8,7 +9,6 @@ import (
 	"github.com/ElizCarvalho/FC_PosGolang/7_APIS/internal/entity"
 	"github.com/ElizCarvalho/FC_PosGolang/7_APIS/internal/webserver/handlers"
 	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/jwtauth"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -31,7 +31,8 @@ func main() {
 	userHandler := handlers.NewUserHandler(userDB, config.TokenAuth, config.JWTExpiresIn)
 
 	r := chi.NewRouter()
-	r.Use(middleware.Logger)
+	//r.Use(middleware.Logger)
+	r.Use(LogRequest)
 
 	r.Route("/products", func(r chi.Router) {
 		r.Use(jwtauth.Verifier(config.TokenAuth))
@@ -49,4 +50,12 @@ func main() {
 	})
 
 	http.ListenAndServe(":"+config.WebServerPort, r)
+}
+
+// LogRequest é um middleware que loga a requisição (criado para teste de middleware personalizado)
+func LogRequest(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Request: %s %s", r.Method, r.URL.Path)
+		next.ServeHTTP(w, r)
+	})
 }
