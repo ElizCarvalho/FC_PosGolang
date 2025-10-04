@@ -30,6 +30,6 @@ Content-Type: application/json
 ###
 GET http://localhost:8000/products?page=1&limit=10&sort=desc HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTk2MTU4MjgsInVzZXJfaWQiOiI1ODE2YWZhYy03YTRjLTRiMDMtYWVlMS05MzI3ZGM3OWZiYWYifQ.t_I4ttMeZQNeov3Zv3tRq2xALwLtKEqlDt2fynCyq4o
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTk2MTc0NTYsInVzZXJfaWQiOiI1ODE2YWZhYy03YTRjLTRiMDMtYWVlMS05MzI3ZGM3OWZiYWYifQ.ZqG8G50xcc0I-X-eOVgl6YRIR1zI574OMmFoC7bXTjI
 
 ###

@@ -9,6 +9,7 @@ import (
 	"github.com/ElizCarvalho/FC_PosGolang/7_APIS/internal/entity"
 	"github.com/ElizCarvalho/FC_PosGolang/7_APIS/internal/webserver/handlers"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/jwtauth"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -28,11 +29,14 @@ func main() {
 	productDB := database.NewProductDB(db)
 	productHandler := handlers.NewProductHandler(productDB)
 	userDB := database.NewUserDB(db)
-	userHandler := handlers.NewUserHandler(userDB, config.TokenAuth, config.JWTExpiresIn)
+	userHandler := handlers.NewUserHandler(userDB)
 
 	r := chi.NewRouter()
 	//r.Use(middleware.Logger)
 	r.Use(LogRequest)
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.WithValue("jwt", config.TokenAuth))
+	r.Use(middleware.WithValue("jwtExpiresIn", config.JWTExpiresIn))
 
 	r.Route("/products", func(r chi.Router) {
 		r.Use(jwtauth.Verifier(config.TokenAuth))
