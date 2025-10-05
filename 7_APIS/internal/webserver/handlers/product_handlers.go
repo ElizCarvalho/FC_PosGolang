@@ -101,16 +101,33 @@ func (h *ProductHandler) GetProducts(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(products)
 }
 
+// Get product godoc
+// @Summary Get a product
+// @Description Get a product endpoint
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param id path string true "product id" Format(uuid)
+// @Success 200 {object} entity.Product
+// @Failure 400 {object} dto.Error
+// @Failure 404 {object} dto.Error
+// @Failure 500 {object} dto.Error
+// @Router /products/{id} [get]
+// @Security ApiKeyAuth
 func (h *ProductHandler) GetProduct(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
 		w.WriteHeader(http.StatusBadRequest)
+		error := dto.Error{Message: "id is required"}
+		json.NewEncoder(w).Encode(error)
 		return
 	}
 
 	product, err := h.ProductDB.FindById(id)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
+		error := dto.Error{Message: err.Error()}
+		json.NewEncoder(w).Encode(error)
 		return
 	}
 

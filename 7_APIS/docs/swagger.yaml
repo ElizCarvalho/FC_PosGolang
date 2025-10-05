@@ -125,6 +125,42 @@ paths:
       summary: Create a product
       tags:
       - products
+  /products/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a product endpoint
+      parameters:
+      - description: product id
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Product'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Get a product
+      tags:
+      - products
   /users:
     post:
       consumes:
