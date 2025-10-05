@@ -21,6 +21,6 @@ func main() {
 			fmt.Printf("%d: Task %s is running\n", i, "anonymous")
 			time.Sleep(1 * time.Second)
 		}
-	}() // Thread 4: A função task é chamada como goroutine
+	}() // Thread 4: função anonima é chamada como goroutine
 	time.Sleep(10 * time.Second) // Thread 4: A função main espera 10 segundos
 }
