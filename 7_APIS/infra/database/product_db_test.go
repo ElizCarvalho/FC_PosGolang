@@ -11,14 +11,22 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	testDBDSN    = "file::memory:"
+	testProduct1 = "Product 1"
+	testProduct2 = "Product 2"
+	testPrice10  = 10.0
+	testPrice20  = 20.0
+)
+
 func TestCreateNewProduct(t *testing.T) {
-	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(testDBDSN), &gorm.Config{})
 	if err != nil {
 		t.Fatal(err)
 	}
 	db.AutoMigrate(&entity.Product{})
 
-	product, _ := entity.NewProduct("Product 1", 10.0)
+	product, _ := entity.NewProduct(testProduct1, testPrice10)
 
 	productDB := NewProductDB(db)
 
@@ -35,7 +43,7 @@ func TestCreateNewProduct(t *testing.T) {
 }
 
 func TestFindAllProducts(t *testing.T) {
-	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(testDBDSN), &gorm.Config{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -68,13 +76,13 @@ func TestFindAllProducts(t *testing.T) {
 }
 
 func TestFindProductById(t *testing.T) {
-	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(testDBDSN), &gorm.Config{})
 	if err != nil {
 		t.Fatal(err)
 	}
 	db.AutoMigrate(&entity.Product{})
 
-	product, _ := entity.NewProduct("Product 1", 10.0)
+	product, _ := entity.NewProduct(testProduct1, testPrice10)
 	db.Create(product)
 
 	productDB := NewProductDB(db)
@@ -86,29 +94,29 @@ func TestFindProductById(t *testing.T) {
 }
 
 func TestUpdateProduct(t *testing.T) {
-	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(testDBDSN), &gorm.Config{})
 	if err != nil {
 		t.Fatal(err)
 	}
 	db.AutoMigrate(&entity.Product{})
 
-	product, _ := entity.NewProduct("Product 1", 10.0)
+	product, _ := entity.NewProduct(testProduct1, testPrice10)
 	db.Create(product)
 
-	product.Name = "Product 2"
-	product.Price = 20.0
+	product.Name = testProduct2
+	product.Price = testPrice20
 	productDB := NewProductDB(db)
 	err = productDB.Update(product)
 	assert.NoError(t, err)
 }
 
 func TestDeleteProduct(t *testing.T) {
-	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(testDBDSN), &gorm.Config{})
 	if err != nil {
 		t.Fatal(err)
 	}
 	db.AutoMigrate(&entity.Product{})
-	product, _ := entity.NewProduct("Product 1", 10.0)
+	product, _ := entity.NewProduct(testProduct1, testPrice10)
 	db.Create(product)
 
 	productDB := NewProductDB(db)
