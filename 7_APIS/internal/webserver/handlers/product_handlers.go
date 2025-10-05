@@ -20,29 +20,60 @@ func NewProductHandler(db database.ProductInterface) *ProductHandler {
 	return &ProductHandler{ProductDB: db}
 }
 
+// Create product godoc
+// @Summary Create a product
+// @Description Create a product endpoint
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param  request body dto.CreateProductInput true "product request"
+// @Success 201 {string} string "Product created successfully"
+// @Failure 400 {object} dto.Error
+// @Failure 500 {object} dto.Error
+// @Router /products [post]
+// @Security ApiKeyAuth
 func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	var product dto.CreateProductInput
 	err := json.NewDecoder(r.Body).Decode(&product)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		error := dto.Error{Message: err.Error()}
+		json.NewEncoder(w).Encode(error)
 		return
 	}
 
 	p, err := entity.NewProduct(product.Name, product.Price)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		error := dto.Error{Message: err.Error()}
+		json.NewEncoder(w).Encode(error)
 		return
 	}
 
 	err = h.ProductDB.Create(p)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		error := dto.Error{Message: err.Error()}
+		json.NewEncoder(w).Encode(error)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("Product created successfully"))
 }
 
+// Get products godoc
+// @Summary Get products
+// @Description Get allproducts endpoint
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param page query string false "page number"
+// @Param limit query string false "limit"
+// @Param sort query string false "sort"
+// @Success 200 {object} []entity.Product
+// @Failure 500 {object} dto.Error
+// @Router /products [get]
+// @Security ApiKeyAuth
 func (h *ProductHandler) GetProducts(w http.ResponseWriter, r *http.Request) {
 	page := r.URL.Query().Get("page")
 	limit := r.URL.Query().Get("limit")
@@ -60,6 +91,8 @@ func (h *ProductHandler) GetProducts(w http.ResponseWriter, r *http.Request) {
 	products, err := h.ProductDB.FindAll(pageInt, limitInt, sort)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		error := dto.Error{Message: err.Error()}
+		json.NewEncoder(w).Encode(error)
 		return
 	}
 
