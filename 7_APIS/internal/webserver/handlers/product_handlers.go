@@ -8,8 +8,11 @@ import (
 	"github.com/ElizCarvalho/FC_PosGolang/7_APIS/infra/database"
 	"github.com/ElizCarvalho/FC_PosGolang/7_APIS/internal/dto"
 	"github.com/ElizCarvalho/FC_PosGolang/7_APIS/internal/entity"
-	entityPkg "github.com/ElizCarvalho/FC_PosGolang/7_APIS/pkg/entity"
 	"github.com/go-chi/chi"
+)
+
+const (
+	ErrIDRequired = "id is required"
 )
 
 type ProductHandler struct {
@@ -118,7 +121,7 @@ func (h *ProductHandler) GetProduct(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		error := dto.Error{Message: "id is required"}
+		error := dto.Error{Message: ErrIDRequired}
 		json.NewEncoder(w).Encode(error)
 		return
 	}
@@ -136,35 +139,65 @@ func (h *ProductHandler) GetProduct(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(product)
 }
 
+// Update product godoc
+// @Summary Update a product
+// @Description Update a product endpoint
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param id path string true "product id" Format(uuid)
+// @Param  request body dto.CreateProductInput true "product request"
+// @Success 200 {string} string "Product updated successfully"
+// @Failure 400 {object} dto.Error
+// @Failure 404 {object} dto.Error
+// @Failure 500 {object} dto.Error
+// @Router /products/{id} [put]
+// @Security ApiKeyAuth
 func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
 		w.WriteHeader(http.StatusBadRequest)
+		error := dto.Error{Message: ErrIDRequired}
+		json.NewEncoder(w).Encode(error)
 		return
 	}
 
-	var product entity.Product
+	var product dto.CreateProductInput
 	err := json.NewDecoder(r.Body).Decode(&product)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		error := dto.Error{Message: err.Error()}
+		json.NewEncoder(w).Encode(error)
 		return
 	}
 
-	product.ID, err = entityPkg.ParseID(id)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	_, err = h.ProductDB.FindById(id)
+	// Buscar o produto existente
+	existingProduct, err := h.ProductDB.FindById(id)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
+		error := dto.Error{Message: err.Error()}
+		json.NewEncoder(w).Encode(error)
 		return
 	}
 
-	err = h.ProductDB.Update(&product)
+	// Atualizar apenas os campos necessários mantendo o ID original
+	existingProduct.Name = product.Name
+	existingProduct.Price = product.Price
+
+	// Validar o produto atualizado
+	err = existingProduct.Validate()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		error := dto.Error{Message: err.Error()}
+		json.NewEncoder(w).Encode(error)
+		return
+	}
+
+	err = h.ProductDB.Update(existingProduct)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		error := dto.Error{Message: err.Error()}
+		json.NewEncoder(w).Encode(error)
 		return
 	}
 
@@ -172,22 +205,41 @@ func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Product updated successfully"))
 }
 
+// Delete product godoc
+// @Summary Delete a product
+// @Description Delete a product endpoint
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param id path string true "product id" Format(uuid)
+// @Success 200 {string} string "Product deleted successfully"
+// @Failure 400 {object} dto.Error
+// @Failure 404 {object} dto.Error
+// @Failure 500 {object} dto.Error
+// @Router /products/{id} [delete]
+// @Security ApiKeyAuth
 func (h *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
 		w.WriteHeader(http.StatusBadRequest)
+		error := dto.Error{Message: ErrIDRequired}
+		json.NewEncoder(w).Encode(error)
 		return
 	}
 
 	_, err := h.ProductDB.FindById(id)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
+		error := dto.Error{Message: err.Error()}
+		json.NewEncoder(w).Encode(error)
 		return
 	}
 
 	err = h.ProductDB.Delete(id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		error := dto.Error{Message: err.Error()}
+		json.NewEncoder(w).Encode(error)
 		return
 	}
 
