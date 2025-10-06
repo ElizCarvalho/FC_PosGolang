@@ -134,6 +134,35 @@ func (suite *EventDispatcherTestSuit) TestEventDispatcherDispatch() {
 	eh.AssertNumberOfCalls(suite.T(), "Handle", 1)
 }
 
+func (suite *EventDispatcherTestSuit) TestEventDispatcherRemove() {
+	// Event 1
+	err := suite.eventDispatcher.Register(suite.event.GetName(), &suite.handler)
+	assert.Nil(suite.T(), err)
+	assert.Len(suite.T(), suite.eventDispatcher.handlers[suite.event.GetName()], 1)
+
+	err = suite.eventDispatcher.Register(suite.event.GetName(), &suite.handler2)
+	assert.Nil(suite.T(), err)
+	assert.Len(suite.T(), suite.eventDispatcher.handlers[suite.event.GetName()], 2)
+
+	// Event 2
+	err = suite.eventDispatcher.Register(suite.event2.GetName(), &suite.handler3)
+	assert.Nil(suite.T(), err)
+	assert.Len(suite.T(), suite.eventDispatcher.handlers[suite.event2.GetName()], 1)
+
+	err = suite.eventDispatcher.Remove(suite.event.GetName(), &suite.handler)
+	assert.Nil(suite.T(), err)
+	assert.Len(suite.T(), suite.eventDispatcher.handlers[suite.event.GetName()], 1)
+	assert.Equal(suite.T(), &suite.handler2, suite.eventDispatcher.handlers[suite.event.GetName()][0])
+
+	err = suite.eventDispatcher.Remove(suite.event2.GetName(), &suite.handler3)
+	assert.Nil(suite.T(), err)
+	assert.Len(suite.T(), suite.eventDispatcher.handlers[suite.event2.GetName()], 0)
+
+	err = suite.eventDispatcher.Remove(suite.event2.GetName(), &suite.handler3)
+	assert.Nil(suite.T(), err)
+	assert.Len(suite.T(), suite.eventDispatcher.handlers[suite.event2.GetName()], 0)
+}
+
 func TestSuite(t *testing.T) {
 	suite.Run(t, new(EventDispatcherTestSuit))
 }
