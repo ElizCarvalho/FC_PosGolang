@@ -41,3 +41,12 @@ func (ed *EventDispatcher) Dispatch(event EventInterface) error {
 	}
 	return nil
 }
+
+func (ed *EventDispatcher) Remove(eventName string, handler EventHandlerInterface) error {
+	if _, ok := ed.handlers[eventName]; ok {
+		ed.handlers[eventName] = slices.DeleteFunc(ed.handlers[eventName], func(h EventHandlerInterface) bool {
+			return h == handler
+		})
+	}
+	return nil
+}
