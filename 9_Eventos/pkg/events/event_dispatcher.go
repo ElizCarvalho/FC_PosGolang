@@ -32,3 +32,12 @@ func (ed *EventDispatcher) Clear() {
 func (ed *EventDispatcher) Has(eventName string, handler EventHandlerInterface) bool {
 	return slices.Contains(ed.handlers[eventName], handler)
 }
+
+func (ed *EventDispatcher) Dispatch(event EventInterface) error {
+	if handlers, ok := ed.handlers[event.GetName()]; ok {
+		for _, handler := range handlers {
+			handler.Handle(event)
+		}
+	}
+	return nil
+}
