@@ -1,6 +1,8 @@
 package rabbitmq
 
-import "github.com/streadway/amqp"
+import (
+	"github.com/streadway/amqp"
+)
 
 func OpenChannel() (*amqp.Channel, error) {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
@@ -15,6 +17,19 @@ func OpenChannel() (*amqp.Channel, error) {
 }
 
 func Consume(ch *amqp.Channel, out chan<- amqp.Delivery) error {
+	// Garante que a fila existe
+	_, err := ch.QueueDeclare(
+		"minha-fila", // name
+		true,         // durable
+		false,        // delete when unused
+		false,        // exclusive
+		false,        // no-wait
+		nil,          // arguments
+	)
+	if err != nil {
+		return err
+	}
+
 	msgs, err := ch.Consume(
 		"minha-fila",  // queue
 		"go-consumer", // consumer
@@ -27,8 +42,12 @@ func Consume(ch *amqp.Channel, out chan<- amqp.Delivery) error {
 	if err != nil {
 		return err
 	}
-	for msg := range msgs {
-		out <- msg
-	}
+
+	go func() {
+		for msg := range msgs {
+			out <- msg
+		}
+	}()
+
 	return nil
 }
