@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	"strconv"
+	"time"
 
 	"github.com/ElizCarvalho/fcutils/rabbitmq"
-	"github.com/streadway/amqp"
 )
 
 func main() {
@@ -15,7 +16,7 @@ func main() {
 	defer ch.Close()
 
 	// Declarar a fila
-	q, err := ch.QueueDeclare(
+	_, err = ch.QueueDeclare(
 		"minha-fila", // name
 		true,         // durable
 		false,        // delete when unused
@@ -28,19 +29,13 @@ func main() {
 	}
 
 	// Publicar mensagem
-	body := "Hello World"
-	err = ch.Publish(
-		"",     // exchange
-		q.Name, // routing key
-		false,  // mandatory
-		false,  // immediate
-		amqp.Publishing{
-			ContentType: "text/plain",
-			Body:        []byte(body),
-		})
-	if err != nil {
-		panic(err)
+	for i := 0; i < 10; i++ {
+		body := "Hello World " + strconv.Itoa(i)
+		err = rabbitmq.Publish(ch, body, "amq.direct")
+		if err != nil {
+			panic(err)
+		}
+		time.Sleep(1 * time.Second)
+		fmt.Printf("Mensagem enviada: %s\n", body)
 	}
-
-	fmt.Printf("Mensagem enviada: %s\n", body)
 }
