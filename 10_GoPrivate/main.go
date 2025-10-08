@@ -42,4 +42,13 @@ func main() {
 	// login <seu_usuario>
 	// password <seu_token_do_bitbucket>
 
+	//------------------------------------------------------------------------------------------------
+	// se quiser que o go mantenha os pacotes no projeto para nao correr o risco de
+	// perder as dependencias, basta usar o comando:
+	// go mod tidy -> remove as dependencias que nao sao mais usadas
+	// go mod vendor -> copia os pacotes para o diretorio vendor
+	// go mod download -> baixa os pacotes para o diretorio vendor
+	// go mod verify -> verifica se os pacotes sao validos
+	// go mod why -> mostra porque o pacote foi instalado
+
 }
