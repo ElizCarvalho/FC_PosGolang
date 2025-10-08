@@ -15,7 +15,7 @@ func main() {
 	defer ch.Close()
 
 	msgs := make(chan amqp.Delivery)
-	err = rabbitmq.Consume(ch, msgs)
+	err = rabbitmq.Consume(ch, msgs, "minha-fila")
 	if err != nil {
 		panic(err)
 	}
