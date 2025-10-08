@@ -144,3 +144,6 @@ fabric.properties
 /4_Banco_de_Dados/data/
 
 .DS_Store
+
+# Aula de RabbitMQ
+/9_Eventos/data/
