@@ -16,10 +16,10 @@ func OpenChannel() (*amqp.Channel, error) {
 	return ch, nil
 }
 
-func Consume(ch *amqp.Channel, out chan<- amqp.Delivery) error {
+func Consume(ch *amqp.Channel, out chan<- amqp.Delivery, queueName string) error {
 	// Garante que a fila existe
 	_, err := ch.QueueDeclare(
-		"minha-fila", // name
+		queueName, // name
 		true,         // durable
 		false,        // delete when unused
 		false,        // exclusive
@@ -31,7 +31,7 @@ func Consume(ch *amqp.Channel, out chan<- amqp.Delivery) error {
 	}
 
 	msgs, err := ch.Consume(
-		"minha-fila",  // queue
+		queueName,  // queue
 		"go-consumer", // consumer
 		false,         // auto-ack
 		false,         // exclusive
@@ -49,5 +49,21 @@ func Consume(ch *amqp.Channel, out chan<- amqp.Delivery) error {
 		}
 	}()
 
+	return nil
+}
+
+func Publish(ch *amqp.Channel, body string, exchangeName string) error {
+	err := ch.Publish(
+		exchangeName, // exchange
+		"",           // routing key
+		false,        // mandatory
+		false,        // immediate
+		amqp.Publishing{
+			ContentType: "text/plain",
+			Body:        []byte(body),
+		})
+	if err != nil {
+		return err
+	}
 	return nil
 }
