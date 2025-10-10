@@ -51,3 +51,12 @@ func (c *Category) List() ([]Category, error) {
 
 	return categories, nil
 }
+
+func (c *Category) GetByID(id string) (Category, error) {
+	var category Category
+	err := c.db.QueryRow("SELECT id, name, description FROM categories WHERE id = ?", id).Scan(&category.ID, &category.Name, &category.Description)
+	if err != nil {
+		return Category{}, err
+	}
+	return category, nil
+}
