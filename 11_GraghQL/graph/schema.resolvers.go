@@ -76,27 +76,22 @@ func (r *queryResolver) Categories(ctx context.Context) ([]*model.Category, erro
 
 // Courses is the resolver for the courses field.
 func (r *queryResolver) Courses(ctx context.Context) ([]*model.Course, error) {
-	courses, err := r.CourseDB.List()
+	// 🚀 OTIMIZAÇÃO: 1 query com JOIN em vez de N+1 queries
+	courses, err := r.CourseDB.ListWithCategories()
 	if err != nil {
 		return nil, err
 	}
 
 	var result []*model.Course
 	for _, course := range courses {
-		// Buscar os dados completos da categoria
-		category, err := r.CategoryDB.GetByID(course.CategoryID)
-		if err != nil {
-			return nil, err
-		}
-
 		result = append(result, &model.Course{
-			ID:          course.ID,
-			Name:        course.Name,
-			Description: course.Description,
+			ID:          course.CourseID,
+			Name:        course.CourseName,
+			Description: course.CourseDescription,
 			Category: &model.Category{
-				ID:          category.ID,
-				Name:        category.Name,
-				Description: category.Description,
+				ID:          course.CategoryID,
+				Name:        course.CategoryName,
+				Description: course.CategoryDescription,
 			},
 		})
 	}
