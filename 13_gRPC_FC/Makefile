@@ -38,6 +38,18 @@ test-create: ## Testa criação de categoria
 	@echo "$(BLUE)🧪 Testando criação de categoria...$(NC)"
 	@grpcurl -plaintext -d '{"name": "Teste", "description": "Categoria de teste"}' localhost:$(PORT) pb.CategoryService.CreateCategory
 
+test-list: ## Testa listagem de categorias
+	@echo "$(BLUE)🧪 Testando listagem de categorias...$(NC)"
+	@grpcurl -plaintext localhost:$(PORT) pb.CategoryService.ListCategories
+
+test-services: ## Lista todos os serviços disponíveis
+	@echo "$(BLUE)🔍 Listando serviços disponíveis...$(NC)"
+	@grpcurl -plaintext localhost:$(PORT) list
+
+test-category-methods: ## Lista métodos do CategoryService
+	@echo "$(BLUE)🔍 Listando métodos do CategoryService...$(NC)"
+	@grpcurl -plaintext localhost:$(PORT) list pb.CategoryService
+
 evans: ## Abre o Evans para interação
 	@echo "$(BLUE)🔧 Abrindo Evans...$(NC)"
 	@evans -r repl --host localhost --port $(PORT) --proto proto/course_category.proto
@@ -50,6 +62,8 @@ interactive-test: ## Teste interativo com grpcurl
 	@echo "$(BLUE)🔧 Modo interativo com grpcurl...$(NC)"
 	@echo "Comandos úteis:"
 	@echo "  grpcurl -plaintext localhost:$(PORT) list"
+	@echo "  grpcurl -plaintext localhost:$(PORT) list pb.CategoryService"
+	@echo "  grpcurl -plaintext localhost:$(PORT) pb.CategoryService.ListCategories"
 	@echo "  grpcurl -plaintext -d '{\"name\": \"Teste\", \"description\": \"Teste\"}' localhost:$(PORT) pb.CategoryService.CreateCategory"
 	@bash
 

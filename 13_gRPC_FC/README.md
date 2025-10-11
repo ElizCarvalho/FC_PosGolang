@@ -222,7 +222,14 @@ grpcurl -plaintext -d '{
 }' localhost:50051 pb.CategoryService.CreateCategory
 ```
 
-#### Exemplo de Resposta
+#### Listar Categorias
+
+```bash
+# Listar todas as categorias
+grpcurl -plaintext localhost:50051 pb.CategoryService.ListCategories
+```
+
+#### Exemplo de Resposta - CreateCategory
 
 ```json
 {
@@ -234,11 +241,36 @@ grpcurl -plaintext -d '{
 }
 ```
 
+#### Exemplo de Resposta - ListCategories
+
+```json
+{
+  "categories": [
+    {
+      "id": "123e4567-e89b-12d3-a456-426614174000",
+      "name": "Backend",
+      "description": "Cursos de desenvolvimento backend"
+    },
+    {
+      "id": "456e7890-e89b-12d3-a456-426614174001",
+      "name": "Frontend",
+      "description": "Cursos de desenvolvimento frontend"
+    }
+  ]
+}
+```
+
 ### 2. Usando Makefile (Mais Fácil)
 
 ```bash
-# Listar serviços
-make test-grpc
+# Listar serviços disponíveis
+make test-services
+
+# Listar métodos do CategoryService
+make test-category-methods
+
+# Listar categorias
+make test-list
 
 # Criar categoria
 make test-create
