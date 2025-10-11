@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package streaming;
+
+option go_package = "github.com/ElizCarvalho/FC_PosGolang/12_gRPC/proto";
+
+// Serviço de streaming
+service StreamingService {
+  // Server Streaming: Envia uma sequência de números
+  rpc CountNumbers(CountRequest) returns (stream CountResponse);
+  
+  // Client Streaming: Recebe uma sequência de números e retorna a soma
+  rpc SumNumbers(stream SumRequest) returns (SumResponse);
+  
+  // Bidirectional Streaming: Recebe números e retorna o dobro de cada um
+  rpc DoubleNumbers(stream DoubleRequest) returns (stream DoubleResponse);
+}
+
+// Mensagens para contagem
+message CountRequest {
+  int32 start = 1;
+  int32 end = 2;
+}
+
+message CountResponse {
+  int32 number = 1;
+}
+
+// Mensagens para soma
+message SumRequest {
+  int32 number = 1;
+}
+
+message SumResponse {
+  int32 total = 1;
+  int32 count = 2;
+}
+
+// Mensagens para dobro
+message DoubleRequest {
+  int32 number = 1;
+}
+
+message DoubleResponse {
+  int32 original = 1;
+  int32 doubled = 2;
+}

@@ -1,0 +1,40 @@
+# Binários
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+server
+client
+
+# Arquivos gerados pelo protoc
+*.pb.go
+*_grpc.pb.go
+
+# Arquivos de configuração local
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# Diretórios de build
+/build/
+/dist/
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Go
+vendor/
+go.work

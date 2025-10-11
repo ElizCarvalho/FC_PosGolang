@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package calculator;
+
+option go_package = "github.com/ElizCarvalho/FC_PosGolang/12_gRPC/proto";
+
+// Serviço de calculadora
+service CalculatorService {
+  // Soma dois números
+  rpc Add(AddRequest) returns (AddResponse);
+  
+  // Subtrai dois números
+  rpc Subtract(SubtractRequest) returns (SubtractResponse);
+  
+  // Multiplica dois números
+  rpc Multiply(MultiplyRequest) returns (MultiplyResponse);
+  
+  // Divide dois números
+  rpc Divide(DivideRequest) returns (DivideResponse);
+  
+  // Calcula a raiz quadrada
+  rpc SquareRoot(SquareRootRequest) returns (SquareRootResponse);
+}
+
+// Mensagens para operação de soma
+message AddRequest {
+  double a = 1;
+  double b = 2;
+}
+
+message AddResponse {
+  double result = 1;
+}
+
+// Mensagens para operação de subtração
+message SubtractRequest {
+  double a = 1;
+  double b = 2;
+}
+
+message SubtractResponse {
+  double result = 1;
+}
+
+// Mensagens para operação de multiplicação
+message MultiplyRequest {
+  double a = 1;
+  double b = 2;
+}
+
+message MultiplyResponse {
+  double result = 1;
+}
+
+// Mensagens para operação de divisão
+message DivideRequest {
+  double a = 1;
+  double b = 2;
+}
+
+message DivideResponse {
+  double result = 1;
+  string error = 2; // Mensagem de erro se houver
+}
+
+// Mensagens para operação de raiz quadrada
+message SquareRootRequest {
+  double number = 1;
+}
+
+message SquareRootResponse {
+  double result = 1;
+  string error = 2; // Mensagem de erro se houver
+}
