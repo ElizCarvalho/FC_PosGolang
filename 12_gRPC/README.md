@@ -5,6 +5,7 @@
 ## 📌 Sobre
 
 Este projeto demonstra como implementar um serviço gRPC em Go, incluindo:
+
 - Definição de serviços usando Protocol Buffers
 - Implementação de servidor gRPC
 - Cliente gRPC para consumir os serviços
@@ -14,11 +15,13 @@ Este projeto demonstra como implementar um serviço gRPC em Go, incluindo:
 ## 🔧 Configuração
 
 ### Pré-requisitos
+
 - Go 1.24+
 - Protocol Buffers compiler (protoc)
 - Plugins do Go para protobuf
 
 ### Instalação
+
 ```bash
 # Configurar o ambiente
 make setup
@@ -30,11 +33,13 @@ make proto
 ## 🚀 Como Usar
 
 ### 1. Iniciar o Servidor
+
 ```bash
 make run-server
 ```
 
 ### 2. Executar o Cliente (em outro terminal)
+
 ```bash
 make run-client
 ```
@@ -44,6 +49,7 @@ make run-client
 ### Serviços Disponíveis
 
 #### CalculatorService
+
 - **Add**: Soma dois números
 - **Subtract**: Subtrai dois números  
 - **Multiply**: Multiplica dois números
@@ -87,7 +93,7 @@ make clean             # Limpa arquivos gerados
 
 ## 🏗️ Estrutura do Projeto
 
-```
+```bash
 12_gRPC/
 ├── proto/                 # Arquivos .proto
 │   ├── calculator.proto
@@ -106,6 +112,7 @@ make clean             # Limpa arquivos gerados
 ## 🔍 Protocol Buffers
 
 O arquivo `calculator.proto` define:
+
 - Serviço `CalculatorService` com 5 operações
 - Mensagens de request e response para cada operação
 - Tratamento de erros através de campos opcionais
