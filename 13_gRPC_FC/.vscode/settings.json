@@ -1,0 +1,24 @@
+{
+  "go.toolsManagement.checkForUpdates": "local",
+  "go.useLanguageServer": true,
+  "go.formatTool": "goimports",
+  "go.lintTool": "golangci-lint",
+  "go.testFlags": ["-v"],
+  "go.buildTags": "",
+  "go.testTimeout": "30s",
+  "files.associations": {
+    "*.proto": "proto3"
+  },
+  "protoc": {
+    "path": "/opt/homebrew/bin/protoc"
+  },
+  "proto3.syntax": "proto3",
+  "proto3.package": "github.com/ElizCarvalho/FC_PosGolang/12_gRPC/proto",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  },
+  "files.exclude": {
+    "**/*.pb.go": false
+  }
+}
