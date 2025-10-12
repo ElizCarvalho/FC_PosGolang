@@ -44,6 +44,17 @@ course-cli
 │   ├── get --key [key] (flags locais)
 │   ├── list --verbose (flag global)
 │   └── reset --force --verbose (flags locais + global)
+├── demo (demonstração de tipos de flags)
+│   ├── --name [string] --age [int] --active [bool]
+│   ├── --price [float] --timeout [duration]
+│   ├── --tags [string-slice] --ports [int-slice]
+│   └── --features [bool-slice]
+└── confirm (flags com opções específicas)
+    ├── --yes [y/n/yes/no] (padrão: y)
+    ├── --mode [interactive/batch] (padrão: interactive)
+    ├── --priority [low/medium/high] (padrão: medium)
+    ├── --environment [dev/staging/prod] (padrão: dev)
+    └── --format [json/xml/yaml] (padrão: json)
 ```
 
 ## 🏷️ Flags Locais vs Globais
@@ -106,6 +117,136 @@ course-cli config set --key "test" --value "value" --verbose
 - A flag é útil em vários comandos
 - É uma configuração geral
 - Exemplo: `--verbose`, `--debug`, `--output-format`
+
+## 🎛️ Manipulação de Flags
+
+### Tipos de Flags Disponíveis
+
+#### 1. **STRING** - Texto
+```go
+cmd.Flags().String("name", "", "Nome da pessoa")
+```
+```bash
+--name "João"
+```
+
+#### 2. **INT** - Números Inteiros
+```go
+cmd.Flags().Int("age", 0, "Idade da pessoa")
+```
+```bash
+--age 25
+```
+
+#### 3. **BOOL** - Valores Booleanos
+```go
+cmd.Flags().Bool("active", false, "Status ativo/inativo")
+```
+```bash
+--active
+```
+
+#### 4. **FLOAT64** - Números Decimais
+```go
+cmd.Flags().Float64("price", 0.0, "Preço do produto")
+```
+```bash
+--price 99.99
+```
+
+#### 5. **DURATION** - Duração de Tempo
+```go
+cmd.Flags().Duration("timeout", 30*time.Second, "Timeout para operações")
+```
+```bash
+--timeout 1m
+--timeout 30s
+```
+
+#### 6. **STRING SLICE** - Múltiplos Textos
+```go
+cmd.Flags().StringSlice("tags", []string{}, "Tags para categorização")
+```
+```bash
+--tags "go,cli,demo"
+```
+
+#### 7. **INT SLICE** - Múltiplos Números
+```go
+cmd.Flags().IntSlice("ports", []int{}, "Lista de portas")
+```
+```bash
+--ports 80,443,8080
+```
+
+#### 8. **BOOL SLICE** - Múltiplos Booleanos
+```go
+cmd.Flags().BoolSlice("features", []bool{}, "Lista de features ativadas")
+```
+```bash
+--features true,false,true
+```
+
+### Técnicas de Manipulação
+
+#### **Obter Valores das Flags**
+```go
+name, _ := cmd.Flags().GetString("name")
+age, _ := cmd.Flags().GetInt("age")
+active, _ := cmd.Flags().GetBool("active")
+```
+
+#### **Verificar se Flag foi Fornecida**
+```go
+if cmd.Flags().Changed("name") {
+    // Flag foi fornecida
+}
+```
+
+#### **Flags Obrigatórias**
+```go
+cmd.MarkFlagRequired("name")
+```
+
+#### **Flags com Shortcuts**
+```go
+cmd.Flags().StringP("output", "o", "", "Arquivo de saída")
+cmd.Flags().BoolP("force", "f", false, "Forçar operação")
+```
+
+#### **Validação de Valores**
+```go
+if age < 0 || age > 150 {
+    fmt.Println("❌ Idade deve estar entre 0 e 150 anos")
+    return
+}
+```
+
+### Flags com Opções Específicas
+
+#### **Exemplo: Yes/No com Valor Padrão**
+```go
+cmd.Flags().String("yes", "y", "Confirmação (y/n ou yes/no) - padrão: y")
+```
+
+**Comportamento:**
+- ✅ **Valor padrão**: `y` (sim)
+- ✅ **Aceita**: `y`, `n`, `yes`, `no`
+- ❌ **Rejeita**: `maybe`, `talvez`, etc.
+
+#### **Validação Personalizada**
+```go
+cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
+    yesFlag, _ := cmd.Flags().GetString("yes")
+    validYes := []string{"y", "n", "yes", "no"}
+    for _, valid := range validYes {
+        if strings.ToLower(yesFlag) == valid {
+            return nil
+        }
+    }
+    return fmt.Errorf("valor inválido para --yes: '%s'. Use: y/n ou yes/no", yesFlag)
+}
+```
 
 ## 🔗 Comandos Encadeados
 
@@ -271,6 +412,39 @@ go build -o course-cli .
 ./course-cli config reset --force --verbose
 ```
 
+### Demonstração de Tipos de Flags
+
+```bash
+# Exemplo básico com diferentes tipos
+./course-cli demo --name "Maria" --age 30 --active --price 99.99
+
+# Exemplo com múltiplos valores
+./course-cli demo --name "João" --tags "go,cli" --ports 80,443,8080
+
+# Exemplo com duração e validação
+./course-cli demo --name "Ana" --timeout 1m --age 25 --active
+
+# Exemplo com flags obrigatórias (falha sem --name)
+./course-cli demo --age 25  # ❌ Erro: flag obrigatória não fornecida
+```
+
+### Flags com Opções Específicas
+
+```bash
+# Usando valores padrão
+./course-cli confirm
+# Usa: yes=y, mode=interactive, priority=medium, environment=dev, format=json
+
+# Personalizando valores
+./course-cli confirm --yes no --mode batch --priority high --environment prod
+
+# Validação de entrada
+./course-cli confirm --yes maybe  # ❌ Erro: valor inválido
+
+# Combinações válidas
+./course-cli confirm --yes yes --mode interactive --priority low --format yaml
+```
+
 ## 🧪 Testes
 
 ### Executar Testes
@@ -344,6 +518,9 @@ make help           # Mostra todos os comandos disponíveis
 ├── cmd/                    # Comandos da CLI
 │   ├── category.go         # Comandos de categoria (CRUD)
 │   ├── category_test.go    # Testes de categoria
+│   ├── config.go          # Comandos de configuração (flags locais/globais)
+│   ├── confirm.go         # Flags com opções específicas (yes/no)
+│   ├── demo.go            # Demonstração de tipos de flags
 │   ├── ping.go            # Comando ping com flag
 │   ├── ping_test.go       # Testes de ping
 │   ├── project.go         # Comando principal de projeto
