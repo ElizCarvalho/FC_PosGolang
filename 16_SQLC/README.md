@@ -75,6 +75,7 @@ brew install sqlc
 ### 2. Configuração do SQLC
 
 **Arquivo: `sqlc.yaml`**
+
 ```yaml
 version: "2"
 sql:
