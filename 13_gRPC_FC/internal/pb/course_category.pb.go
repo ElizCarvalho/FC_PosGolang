@@ -322,9 +322,10 @@ const file_proto_course_category_proto_rawDesc = "" +
 	"\fCategoryList\x12,\n" +
 	"\n" +
 	"categories\x18\x01 \x03(\v2\f.pb.CategoryR\n" +
-	"categories2\xc6\x01\n" +
+	"categories2\x8f\x02\n" +
 	"\x0fCategoryService\x12C\n" +
-	"\x0eCreateCategory\x12\x19.pb.CreateCategoryRequest\x1a\x14.pb.CategoryResponse\"\x00\x12/\n" +
+	"\x0eCreateCategory\x12\x19.pb.CreateCategoryRequest\x1a\x14.pb.CategoryResponse\"\x00\x12G\n" +
+	"\x14CreateCategoryStream\x12\x19.pb.CreateCategoryRequest\x1a\x10.pb.CategoryList\"\x000\x01\x12/\n" +
 	"\x0eListCategories\x12\t.pb.blank\x1a\x10.pb.CategoryList\"\x00\x12=\n" +
 	"\vGetCategory\x12\x16.pb.GetCategoryRequest\x1a\x14.pb.CategoryResponse\"\x00B\rZ\vinternal/pbb\x06proto3"
 
@@ -353,13 +354,15 @@ var file_proto_course_category_proto_depIdxs = []int32{
 	0, // 0: pb.CategoryResponse.category:type_name -> pb.Category
 	0, // 1: pb.CategoryList.categories:type_name -> pb.Category
 	1, // 2: pb.CategoryService.CreateCategory:input_type -> pb.CreateCategoryRequest
-	3, // 3: pb.CategoryService.ListCategories:input_type -> pb.blank
-	4, // 4: pb.CategoryService.GetCategory:input_type -> pb.GetCategoryRequest
-	2, // 5: pb.CategoryService.CreateCategory:output_type -> pb.CategoryResponse
-	5, // 6: pb.CategoryService.ListCategories:output_type -> pb.CategoryList
-	2, // 7: pb.CategoryService.GetCategory:output_type -> pb.CategoryResponse
-	5, // [5:8] is the sub-list for method output_type
-	2, // [2:5] is the sub-list for method input_type
+	1, // 3: pb.CategoryService.CreateCategoryStream:input_type -> pb.CreateCategoryRequest
+	3, // 4: pb.CategoryService.ListCategories:input_type -> pb.blank
+	4, // 5: pb.CategoryService.GetCategory:input_type -> pb.GetCategoryRequest
+	2, // 6: pb.CategoryService.CreateCategory:output_type -> pb.CategoryResponse
+	5, // 7: pb.CategoryService.CreateCategoryStream:output_type -> pb.CategoryList
+	5, // 8: pb.CategoryService.ListCategories:output_type -> pb.CategoryList
+	2, // 9: pb.CategoryService.GetCategory:output_type -> pb.CategoryResponse
+	6, // [6:10] is the sub-list for method output_type
+	2, // [2:6] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
 	2, // [2:2] is the sub-list for extension extendee
 	0, // [0:2] is the sub-list for field type_name

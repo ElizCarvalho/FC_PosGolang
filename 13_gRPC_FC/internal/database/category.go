@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -59,4 +60,23 @@ func (c *Category) GetByID(id string) (Category, error) {
 		return Category{}, err
 	}
 	return category, nil
+}
+
+// CreateMultiple cria múltiplas categorias simuladas para demonstração do streaming
+func (c *Category) CreateMultiple(baseName, baseDescription string, count int) ([]Category, error) {
+	var categories []Category
+
+	// Simula criação de múltiplas categorias
+	for i := 0; i < count; i++ {
+		category, err := c.Create(
+			fmt.Sprintf("%s %d", baseName, i+1),
+			fmt.Sprintf("%s - Categoria %d", baseDescription, i+1),
+		)
+		if err != nil {
+			return nil, err
+		}
+		categories = append(categories, category)
+	}
+
+	return categories, nil
 }

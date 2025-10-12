@@ -47,6 +47,10 @@ test-get: ## Testa busca de categoria por ID
 	@echo "Exemplo: grpcurl -plaintext -d '{\"id\": \"780c5d43-eccd-4267-a03b-3bc728db4c09\"}' localhost:$(PORT) pb.CategoryService.GetCategory"
 	@echo "Substitua CATEGORY_ID pelo ID de uma categoria existente"
 
+test-stream: ## Testa o streaming de categorias
+	@echo "$(BLUE)🧪 Testando CreateCategoryStream...$(NC)"
+	@go run cmd/testClient/main.go
+
 test-services: ## Lista todos os serviços disponíveis
 	@echo "$(BLUE)🔍 Listando serviços disponíveis...$(NC)"
 	@grpcurl -plaintext localhost:$(PORT) list
