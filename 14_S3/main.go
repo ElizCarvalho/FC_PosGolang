@@ -515,7 +515,7 @@ func testConcurrentUpload(files []string) time.Duration {
 
 func runPerformanceDemo() {
 	fmt.Println("🚀 Demo de Performance: S3 Upload")
-	fmt.Println("==================================\n")
+	fmt.Println("==================================")
 
 	// Verifica se MinIO está rodando
 	if !isMinIORunning() {
@@ -524,7 +524,7 @@ func runPerformanceDemo() {
 		return
 	}
 
-	fmt.Println("📊 Comparando implementações...\n")
+	fmt.Println("📊 Comparando implementações...")
 
 	// Teste com diferentes quantidades de arquivos
 	testCases := []int{5, 20, 50}
@@ -546,7 +546,7 @@ func runPerformanceDemo() {
 
 		// Resultados
 		improvement := float64(sequentialTime) / float64(concurrentTime)
-		fmt.Printf("   📈 Resultado: %.1fx mais rápido!\n", improvement)
+		fmt.Printf("   📈 Resultado: %.1fx mais rápido!", improvement)
 		fmt.Printf("   ⏱️  Sequencial: %v\n", sequentialTime)
 		fmt.Printf("   ⚡ Concorrente: %v\n\n", concurrentTime)
 	}
@@ -590,7 +590,7 @@ func main() {
 	client := s3.New(sess)
 
 	fmt.Println("🚀 Iniciando exemplos com S3 (MinIO)")
-	fmt.Println("=====================================\n")
+	fmt.Println("=====================================")
 
 	// 1. Criar bucket
 	if err := createBucket(client, bucketName); err != nil {
