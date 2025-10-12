@@ -6,6 +6,15 @@
 
 Este projeto demonstra a implementação de um serviço gRPC em Go para gerenciar categorias de cursos. O gRPC é um framework de comunicação RPC (Remote Procedure Call) de alta performance desenvolvido pelo Google, que utiliza Protocol Buffers como formato de serialização.
 
+### 🌟 Features Implementadas
+
+- ✅ **Unary RPC**: Requisição e resposta simples (CreateCategory, GetCategory, ListCategories)
+- ✅ **Server-Side Streaming**: Servidor envia múltiplas respostas (CreateCategoryStream)
+- ✅ **Bidirectional Streaming**: Cliente e servidor enviam múltiplas mensagens (CreateCategoryStreamBidirectional)
+- ✅ Persistência com SQLite
+- ✅ Reflection habilitado para introspecção
+- ✅ Clientes de teste para demonstração
+
 ## 🔧 Configuração do Ambiente
 
 ### Pré-requisitos
@@ -462,12 +471,48 @@ make interactive-test
 make clean
 ```
 
+## 📚 Documentação de Streaming
+
+Este projeto implementa três tipos de comunicação gRPC:
+
+### 1. Server-Side Streaming
+
+📄 **[Documentação completa: Server-Side Streaming](docs/streaming.md)**
+
+- Como funciona o streaming unidirecional (servidor → cliente)
+- Implementação do `CreateCategoryStream`
+- Casos de uso e melhores práticas
+- Troubleshooting
+
+**Teste rápido:**
+
+```bash
+make test-stream
+```
+
+### 2. Bidirectional Streaming
+
+📄 **[Documentação completa: Bidirectional Streaming](docs/bidirectional-streaming.md)**
+
+- Como funciona o streaming bidirecional (cliente ↔ servidor)
+- Implementação do `CreateCategoryStreamBidirectional`
+- Gerenciamento de goroutines
+- Comparação com outros tipos de streaming
+- Casos de uso reais (chat, upload com progresso, etc.)
+
+**Teste rápido:**
+
+```bash
+make test-bidi
+```
+
 ## 📖 Recursos para Estudo
 
 - [Documentação oficial do gRPC](https://grpc.io/docs/)
 - [Protocol Buffers Guide](https://developers.google.com/protocol-buffers/docs/overview)
 - [gRPC Go Quick Start](https://grpc.io/docs/languages/go/quickstart/)
 - [grpcurl - Ferramenta de teste gRPC](https://github.com/fullstorydev/grpcurl)
+- [gRPC Streaming Concepts](https://grpc.io/docs/what-is-grpc/core-concepts/#server-streaming-rpc)
 
 ## 🤝 Contribuição
 

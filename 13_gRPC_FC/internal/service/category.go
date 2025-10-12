@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"io"
 
 	"github.com/ElizCarvalho/FC_PosGolang/13_gRPC_FC/internal/database"
 	"github.com/ElizCarvalho/FC_PosGolang/13_gRPC_FC/internal/pb"
@@ -110,4 +111,36 @@ func (c *CategoryService) CreateCategoryStream(req *pb.CreateCategoryRequest, st
 	}
 
 	return nil
+}
+
+// CreateCategoryStreamBidirectional implementa bidirectional streaming
+// Cliente envia múltiplas requisições e servidor responde para cada uma
+func (c *CategoryService) CreateCategoryStreamBidirectional(stream grpc.BidiStreamingServer[pb.CreateCategoryRequest, pb.Category]) error {
+	for {
+		// Recebe a próxima requisição do cliente
+		req, err := stream.Recv()
+		if err == io.EOF {
+			// Cliente terminou de enviar
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+
+		// Cria a categoria
+		category, err := c.CategoryDB.Create(req.Name, req.Description)
+		if err != nil {
+			return err
+		}
+
+		// Envia a resposta de volta ao cliente imediatamente
+		err = stream.Send(&pb.Category{
+			Id:          category.ID,
+			Name:        category.Name,
+			Description: category.Description,
+		})
+		if err != nil {
+			return err
+		}
+	}
 }
