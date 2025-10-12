@@ -6,6 +6,15 @@ import (
 	"github.com/google/uuid"
 )
 
+// CategoryRepository interface para o repositório de categoria
+type CategoryRepository interface {
+	Create(name, description string) (Category, error)
+	List() ([]Category, error)
+	GetByID(id string) (Category, error)
+	Update(id, name, description string) error
+	Delete(id string) error
+}
+
 type Category struct {
 	db          *sql.DB
 	ID          string

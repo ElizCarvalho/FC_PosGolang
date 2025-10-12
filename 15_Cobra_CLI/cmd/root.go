@@ -16,10 +16,34 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
 )
+
+// RunEFunc é um tipo personalizado para funções que retornam erro
+type RunEFunc func(cmd *cobra.Command, args []string) error
+
+// RunEWithErrorHandling executa uma função RunE com tratamento elegante de erro
+func RunEWithErrorHandling(fn RunEFunc) func(cmd *cobra.Command, args []string) {
+	return func(cmd *cobra.Command, args []string) {
+		if err := fn(cmd, args); err != nil {
+			fmt.Printf("❌ Erro: %v\n", err)
+			os.Exit(1)
+		}
+	}
+}
+
+// HandlerFunc é um tipo para funções que lidam com a lógica de negócio
+type HandlerFunc func(args []string) error
+
+// CreateHandler cria um handler para comandos que não precisam do cmd
+func CreateHandler(handler HandlerFunc) RunEFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		return handler(args)
+	}
+}
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{

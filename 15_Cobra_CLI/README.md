@@ -591,6 +591,148 @@ go build -o course-cli .
 # ❌ Falha no PreRunE: Nome 'erro' não é permitido
 ```
 
+## 🎯 Padrão RunEFunc - Tratamento Elegante de Erros
+
+### O que é o RunEFunc?
+
+O **RunEFunc** é um padrão elegante para tratar erros em comandos Cobra, separando a lógica de negócio dos comandos e proporcionando um tratamento de erro consistente.
+
+### Estrutura do Padrão
+
+#### **1. Tipos Personalizados**
+```go
+// RunEFunc é um tipo personalizado para funções que retornam erro
+type RunEFunc func(cmd *cobra.Command, args []string) error
+
+// HandlerFunc é um tipo para funções que lidam com a lógica de negócio
+type HandlerFunc func(args []string) error
+```
+
+#### **2. Funções Auxiliares**
+```go
+// RunEWithErrorHandling executa uma função RunE com tratamento elegante de erro
+func RunEWithErrorHandling(fn RunEFunc) func(cmd *cobra.Command, args []string) {
+    return func(cmd *cobra.Command, args []string) {
+        if err := fn(cmd, args); err != nil {
+            fmt.Printf("❌ Erro: %v\n", err)
+            os.Exit(1)
+        }
+    }
+}
+
+// CreateHandler cria um handler para comandos que não precisam do cmd
+func CreateHandler(handler HandlerFunc) RunEFunc {
+    return func(cmd *cobra.Command, args []string) error {
+        return handler(args)
+    }
+}
+```
+
+### Como Usar
+
+#### **Antes (Deselegante)**
+```go
+var createCmd = &cobra.Command{
+    Use: "create",
+    Run: func(cmd *cobra.Command, args []string) {
+        if categoryService == nil {
+            log.Fatal("❌ Serviço não inicializado")
+        }
+        
+        category, err := categoryService.Create(args[0], args[1])
+        if err != nil {
+            log.Fatalf("Erro ao criar: %v", err)
+        }
+        
+        fmt.Printf("✅ Categoria criada: %s\n", category.Name)
+    },
+}
+```
+
+#### **Depois (Elegante)**
+```go
+// Handler separado (lógica de negócio)
+func createCategoryHandler(args []string) error {
+    if categoryService == nil {
+        return fmt.Errorf("serviço de categoria não foi inicializado")
+    }
+
+    category, err := categoryService.Create(args[0], args[1])
+    if err != nil {
+        return fmt.Errorf("erro ao criar categoria: %w", err)
+    }
+
+    fmt.Printf("✅ Categoria criada com sucesso!\n")
+    fmt.Printf("ID: %s\n", category.ID)
+    fmt.Printf("Nome: %s\n", category.Name)
+    return nil
+}
+
+// Comando limpo e focado
+var createCmd = &cobra.Command{
+    Use: "create",
+    Run: RunEWithErrorHandling(CreateHandler(createCategoryHandler)),
+}
+```
+
+### Benefícios do Padrão
+
+1. **✅ Separação de Responsabilidades**
+   - Comandos focam apenas na definição (Use, Short, Long, Args)
+   - Handlers contêm toda a lógica de negócio
+   - Tratamento de erro centralizado
+
+2. **✅ Reutilização**
+   - Handlers podem ser testados independentemente
+   - Lógica de negócio pode ser reutilizada
+   - Tratamento de erro consistente
+
+3. **✅ Testabilidade**
+   - Handlers são funções puras (fáceis de testar)
+   - Mocking simplificado
+   - Testes unitários mais focados
+
+4. **✅ Manutenibilidade**
+   - Código mais limpo e organizado
+   - Fácil de entender e modificar
+   - Padrão consistente em toda aplicação
+
+5. **✅ Tratamento de Erro Elegante**
+   - Sem `log.Fatal` espalhado pelo código
+   - Mensagens de erro consistentes
+   - Uso de `fmt.Errorf` com `%w` para wrapping
+
+### Exemplo Completo
+
+```go
+// Handler para criação de categoria
+func createCategoryHandler(args []string) error {
+    if categoryService == nil {
+        return fmt.Errorf("serviço de categoria não foi inicializado")
+    }
+
+    category, err := categoryService.Create(args[0], args[1])
+    if err != nil {
+        return fmt.Errorf("erro ao criar categoria: %w", err)
+    }
+
+    fmt.Printf("✅ Categoria criada com sucesso!\n")
+    fmt.Printf("ID: %s\n", category.ID)
+    fmt.Printf("Nome: %s\n", category.Name)
+    fmt.Printf("Descrição: %s\n", category.Description)
+    return nil
+}
+
+// Comando usando o padrão
+var createCmd = &cobra.Command{
+    Use:   "create [name] [description]",
+    Short: "Criar uma nova categoria",
+    Long:  `Cria uma nova categoria com nome e descrição fornecidos.`,
+    Args:  cobra.ExactArgs(2),
+    Run:   RunEWithErrorHandling(CreateHandler(createCategoryHandler)),
+}
+```
+
 ## 🧪 Testes
 
 ### Executar Testes

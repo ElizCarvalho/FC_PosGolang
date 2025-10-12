@@ -6,12 +6,18 @@ package cmd
 import (
 	"database/sql"
 	"fmt"
-	"log"
 
-	"github.com/ElizCarvalho/FC_PosGolang/15_Cobra_CLI/internal/config"
-	"github.com/ElizCarvalho/FC_PosGolang/15_Cobra_CLI/internal/database"
+	"github.com/ElizCarvalho/FC_PosGolang/15_Cobra_CLI/internal/service"
 	"github.com/spf13/cobra"
 )
+
+// categoryService é a instância do serviço (injetada via DI)
+var categoryService service.CategoryService
+
+// SetCategoryService define o serviço de categoria (DI)
+func SetCategoryService(service service.CategoryService) {
+	categoryService = service
+}
 
 // categoryCmd represents the category command
 var categoryCmd = &cobra.Command{
@@ -36,21 +42,7 @@ var createCmd = &cobra.Command{
 Exemplo:
   course-cli category create "Programação" "Cursos de programação e desenvolvimento"`,
 	Args: cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
-		db := config.GetDB()
-		defer db.Close()
-
-		categoryRepo := database.NewCategory(db)
-		category, err := categoryRepo.Create(args[0], args[1])
-		if err != nil {
-			log.Fatalf("Erro ao criar categoria: %v", err)
-		}
-
-		fmt.Printf("✅ Categoria criada com sucesso!\n")
-		fmt.Printf("ID: %s\n", category.ID)
-		fmt.Printf("Nome: %s\n", category.Name)
-		fmt.Printf("Descrição: %s\n", category.Description)
-	},
+	Run:  RunEWithErrorHandling(CreateHandler(createCategoryHandler)),
 }
 
 // listCmd represents the list command
@@ -61,28 +53,7 @@ var listCmd = &cobra.Command{
 	
 Exemplo:
   course-cli category list`,
-	Run: func(cmd *cobra.Command, args []string) {
-		db := config.GetDB()
-		defer db.Close()
-
-		categoryRepo := database.NewCategory(db)
-		categories, err := categoryRepo.List()
-		if err != nil {
-			log.Fatalf("Erro ao listar categorias: %v", err)
-		}
-
-		if len(categories) == 0 {
-			fmt.Println("📝 Nenhuma categoria encontrada.")
-			return
-		}
-
-		fmt.Printf("📋 Categorias encontradas (%d):\n\n", len(categories))
-		for i, category := range categories {
-			fmt.Printf("%d. ID: %s\n", i+1, category.ID)
-			fmt.Printf("   Nome: %s\n", category.Name)
-			fmt.Printf("   Descrição: %s\n\n", category.Description)
-		}
-	},
+	Run: RunEWithErrorHandling(CreateHandler(listCategoriesHandler)),
 }
 
 // getCmd represents the get command
@@ -94,26 +65,7 @@ var getCmd = &cobra.Command{
 Exemplo:
   course-cli category get <category-id>`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		db := config.GetDB()
-		defer db.Close()
-
-		categoryRepo := database.NewCategory(db)
-		category, err := categoryRepo.GetByID(args[0])
-		if err != nil {
-			if err == sql.ErrNoRows {
-				fmt.Printf("❌ Categoria com ID '%s' não encontrada.\n", args[0])
-			} else {
-				log.Fatalf("Erro ao buscar categoria: %v", err)
-			}
-			return
-		}
-
-		fmt.Printf("📋 Categoria encontrada:\n\n")
-		fmt.Printf("ID: %s\n", category.ID)
-		fmt.Printf("Nome: %s\n", category.Name)
-		fmt.Printf("Descrição: %s\n", category.Description)
-	},
+	Run:  RunEWithErrorHandling(CreateHandler(getCategoryHandler)),
 }
 
 // updateCmd represents the update command
@@ -125,21 +77,7 @@ var updateCmd = &cobra.Command{
 Exemplo:
   course-cli category update <id> "Novo Nome" "Nova Descrição"`,
 	Args: cobra.ExactArgs(3),
-	Run: func(cmd *cobra.Command, args []string) {
-		db := config.GetDB()
-		defer db.Close()
-
-		categoryRepo := database.NewCategory(db)
-		err := categoryRepo.Update(args[0], args[1], args[2])
-		if err != nil {
-			log.Fatalf("Erro ao atualizar categoria: %v", err)
-		}
-
-		fmt.Printf("✅ Categoria atualizada com sucesso!\n")
-		fmt.Printf("ID: %s\n", args[0])
-		fmt.Printf("Novo Nome: %s\n", args[1])
-		fmt.Printf("Nova Descrição: %s\n", args[2])
-	},
+	Run:  RunEWithErrorHandling(CreateHandler(updateCategoryHandler)),
 }
 
 // deleteCmd represents the delete command
@@ -151,18 +89,7 @@ var deleteCmd = &cobra.Command{
 Exemplo:
   course-cli category delete <id>`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		db := config.GetDB()
-		defer db.Close()
-
-		categoryRepo := database.NewCategory(db)
-		err := categoryRepo.Delete(args[0])
-		if err != nil {
-			log.Fatalf("Erro ao deletar categoria: %v", err)
-		}
-
-		fmt.Printf("✅ Categoria com ID '%s' deletada com sucesso!\n", args[0])
-	},
+	Run:  RunEWithErrorHandling(CreateHandler(deleteCategoryHandler)),
 }
 
 func init() {
@@ -174,4 +101,109 @@ func init() {
 	categoryCmd.AddCommand(getCmd)
 	categoryCmd.AddCommand(updateCmd)
 	categoryCmd.AddCommand(deleteCmd)
+}
+
+// InitializeCategoryService inicializa o serviço de categoria com dependências
+func InitializeCategoryService(service service.CategoryService) {
+	SetCategoryService(service)
+}
+
+// Handlers para operações de categoria (lógica de negócio separada dos comandos)
+
+// createCategoryHandler lida com a criação de categorias
+func createCategoryHandler(args []string) error {
+	if categoryService == nil {
+		return fmt.Errorf("serviço de categoria não foi inicializado")
+	}
+
+	category, err := categoryService.Create(args[0], args[1])
+	if err != nil {
+		return fmt.Errorf("erro ao criar categoria: %w", err)
+	}
+
+	fmt.Printf("✅ Categoria criada com sucesso!\n")
+	fmt.Printf("ID: %s\n", category.ID)
+	fmt.Printf("Nome: %s\n", category.Name)
+	fmt.Printf("Descrição: %s\n", category.Description)
+	return nil
+}
+
+// listCategoriesHandler lida com a listagem de categorias
+func listCategoriesHandler(args []string) error {
+	if categoryService == nil {
+		return fmt.Errorf("serviço de categoria não foi inicializado")
+	}
+
+	categories, err := categoryService.List()
+	if err != nil {
+		return fmt.Errorf("erro ao listar categorias: %w", err)
+	}
+
+	if len(categories) == 0 {
+		fmt.Println("📝 Nenhuma categoria encontrada.")
+		return nil
+	}
+
+	fmt.Printf("📋 Categorias encontradas (%d):\n\n", len(categories))
+	for i, category := range categories {
+		fmt.Printf("%d. ID: %s\n", i+1, category.ID)
+		fmt.Printf("   Nome: %s\n", category.Name)
+		fmt.Printf("   Descrição: %s\n\n", category.Description)
+	}
+	return nil
+}
+
+// getCategoryHandler lida com a busca de categoria por ID
+func getCategoryHandler(args []string) error {
+	if categoryService == nil {
+		return fmt.Errorf("serviço de categoria não foi inicializado")
+	}
+
+	category, err := categoryService.GetByID(args[0])
+	if err != nil {
+		if err == sql.ErrNoRows {
+			fmt.Printf("❌ Categoria com ID '%s' não encontrada.\n", args[0])
+			return nil // Não é um erro fatal, apenas não encontrou
+		}
+		return fmt.Errorf("erro ao buscar categoria: %w", err)
+	}
+
+	fmt.Printf("📋 Categoria encontrada:\n\n")
+	fmt.Printf("ID: %s\n", category.ID)
+	fmt.Printf("Nome: %s\n", category.Name)
+	fmt.Printf("Descrição: %s\n", category.Description)
+	return nil
+}
+
+// updateCategoryHandler lida com a atualização de categorias
+func updateCategoryHandler(args []string) error {
+	if categoryService == nil {
+		return fmt.Errorf("serviço de categoria não foi inicializado")
+	}
+
+	err := categoryService.Update(args[0], args[1], args[2])
+	if err != nil {
+		return fmt.Errorf("erro ao atualizar categoria: %w", err)
+	}
+
+	fmt.Printf("✅ Categoria atualizada com sucesso!\n")
+	fmt.Printf("ID: %s\n", args[0])
+	fmt.Printf("Novo Nome: %s\n", args[1])
+	fmt.Printf("Nova Descrição: %s\n", args[2])
+	return nil
+}
+
+// deleteCategoryHandler lida com a deleção de categorias
+func deleteCategoryHandler(args []string) error {
+	if categoryService == nil {
+		return fmt.Errorf("serviço de categoria não foi inicializado")
+	}
+
+	err := categoryService.Delete(args[0])
+	if err != nil {
+		return fmt.Errorf("erro ao deletar categoria: %w", err)
+	}
+
+	fmt.Printf("✅ Categoria com ID '%s' deletada com sucesso!\n", args[0])
+	return nil
 }
