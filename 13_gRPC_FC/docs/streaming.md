@@ -7,11 +7,13 @@ Foi implementado o método `CreateCategoryStream` que demonstra **Server-Side St
 ## 🧠 Conceito: Server-Side Streaming
 
 ### O que é?
+
 - **Padrão**: Cliente envia UMA requisição → Servidor envia MÚLTIPLAS respostas
 - **Fluxo**: Unidirecional (servidor → cliente)
 - **Benefício**: Cliente recebe dados progressivamente, sem esperar tudo terminar
 
 ### Quando usar?
+
 - Processar grandes volumes de dados em lotes
 - Enviar atualizações progressivas ao cliente
 - Melhorar a percepção de performance
@@ -20,6 +22,7 @@ Foi implementado o método `CreateCategoryStream` que demonstra **Server-Side St
 ## 🏗️ Arquitetura da Implementação
 
 ### 1. **Definição no Proto** (`proto/course_category.proto`)
+
 ```protobuf
 service CategoryService {
     // Unary RPC (1 request → 1 response)
@@ -33,6 +36,7 @@ service CategoryService {
 **Observação**: A palavra-chave `stream` antes do tipo de retorno indica Server-Side Streaming.
 
 ### 2. **Database Layer** (`internal/database/category.go`)
+
 ```go
 // CreateMultiple cria múltiplas categorias simuladas
 func (c *Category) CreateMultiple(baseName, baseDescription string, count int) ([]Category, error) {
@@ -54,6 +58,7 @@ func (c *Category) CreateMultiple(baseName, baseDescription string, count int) (
 ```
 
 ### 3. **Service Layer** (`internal/service/category.go`)
+
 ```go
 func (c *CategoryService) CreateCategoryStream(
     req *pb.CreateCategoryRequest, 
@@ -95,11 +100,13 @@ func (c *CategoryService) CreateCategoryStream(
 ```
 
 **Pontos-chave:**
+
 - Parâmetro `stream grpc.ServerStreamingServer[pb.CategoryList]`: Interface para enviar múltiplas respostas
 - Método `stream.Send()`: Envia cada lote para o cliente
 - Retorno `nil`: Indica que o stream foi concluído com sucesso
 
 ### 4. **Cliente** (`cmd/testClient/main.go`)
+
 ```go
 // 1. Chama o método de streaming
 stream, err := client.CreateCategoryStream(context.Background(), req)
@@ -124,13 +131,14 @@ for {
 ```
 
 **Pontos-chave:**
+
 - `stream.Recv()`: Bloqueia até receber próxima resposta ou `io.EOF`
 - `io.EOF`: Indica que o servidor terminou o stream
 - Loop contínuo até receber `EOF`
 
 ## 📊 Fluxo de Execução
 
-```
+```mermaid
 Cliente                     Servidor
   |                            |
   |---(1) CreateCategoryStream--->|
@@ -150,12 +158,14 @@ Cliente                     Servidor
 ## 🚀 Como Testar
 
 ### 1. Iniciar o servidor
+
 ```bash
 cd /Users/ecarvalho/Documents/GitHub/FC_PosGolang/13_gRPC_FC
 go run cmd/grpcServer/main.go
 ```
 
 ### 2. Executar o cliente de teste
+
 ```bash
 # Terminal 2
 make test-stream
@@ -168,6 +178,7 @@ go run cmd/testClient/main.go
 ```
 
 ### 3. Usar grpcurl (linha de comando)
+
 ```bash
 grpcurl -plaintext \
   -d '{"name": "Teste", "description": "Streaming test"}' \
@@ -182,6 +193,7 @@ grpcurl -plaintext \
 **Causa**: Arquivos `.pb.go` não foram regenerados ou servidor está usando cache antigo.
 
 **Solução**:
+
 ```bash
 # 1. Limpar arquivos antigos
 rm -f internal/pb/*.pb.go
@@ -216,4 +228,3 @@ go build -o main cmd/grpcServer/main.go
 4. O cliente recebe dados conforme são enviados, não precisa esperar tudo
 5. `io.EOF` indica fim do stream no cliente
 6. Sempre regenere os arquivos `.pb.go` após modificar o `.proto`
-
