@@ -35,7 +35,11 @@ make setup
 ### 3. Rodar a aplicação
 
 ```bash
+# Exemplos básicos do S3
 make run
+
+# Demo de performance (comparação sequencial vs concorrente)
+make run-demo
 ```
 
 ## 📚 Exemplos Implementados
@@ -95,6 +99,33 @@ Acesse http://localhost:9001 para gerenciar visualmente:
 - 📁 Arquivos
 - ⚙️ Configurações
 - 👥 Usuários
+
+## 🧪 Testes
+
+```bash
+# Testes unitários
+make test
+
+# Benchmarks de performance
+make benchmark
+```
+
+## ⚡ Demo de Performance
+
+O projeto inclui um demo que compara upload sequencial vs concorrente:
+
+```bash
+# Demo interativo
+make run-demo
+
+# Ou diretamente
+go run main.go demo
+```
+
+**Resultados esperados:**
+- Upload sequencial: ~15-20 segundos (50 arquivos)
+- Upload concorrente: ~3-5 segundos (50 arquivos)
+- **Melhoria: 3-5x mais rápido!**
 
 ## 🧹 Limpeza
 

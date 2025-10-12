@@ -13,7 +13,7 @@ NC=\033[0m
 # ==============================================================================
 # Comandos de Desenvolvimento
 # ==============================================================================
-.PHONY: setup minio-up minio-down run clean console
+.PHONY: setup minio-up minio-down run run-optimized test benchmark clean console
 
 setup: ## Configura o ambiente
 	@echo "$(BLUE)🔧 Configurando ambiente...$(NC)"
@@ -34,9 +34,21 @@ minio-down: ## Para o MinIO
 	@docker-compose down
 	@echo "$(GREEN)✅ MinIO parado!$(NC)"
 
-run: ## Roda a aplicação
-	@echo "$(BLUE)🚀 Executando aplicação...$(NC)"
+run: ## Roda a aplicação básica
+	@echo "$(BLUE)🚀 Executando aplicação básica...$(NC)"
 	@go run main.go
+
+run-demo: ## Roda o demo de performance
+	@echo "$(BLUE)🚀 Executando demo de performance...$(NC)"
+	@go run main.go demo
+
+test: ## Roda os testes
+	@echo "$(BLUE)🧪 Executando testes...$(NC)"
+	@go test -v ./...
+
+benchmark: ## Roda benchmarks de performance
+	@echo "$(BLUE)⚡ Executando benchmarks...$(NC)"
+	@go test -bench=. -benchmem ./...
 
 console: ## Abre o console do MinIO
 	@echo "$(BLUE)🌐 Abrindo console do MinIO...$(NC)"
@@ -44,7 +56,7 @@ console: ## Abre o console do MinIO
 
 clean: ## Remove arquivos gerados
 	@echo "$(BLUE)🧹 Limpando arquivos...$(NC)"
-	@rm -f arquivo-local.txt
+	@rm -f arquivo-local.txt test-file-*.txt large-file.txt
 	@docker-compose down -v
 	@echo "$(GREEN)✅ Limpeza concluída!$(NC)"
 
@@ -56,4 +68,3 @@ help: ## Mostra essa ajuda
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(YELLOW)%-20s$(NC) %s\n", $$1, $$2}'
 
 .DEFAULT_GOAL := help
-
