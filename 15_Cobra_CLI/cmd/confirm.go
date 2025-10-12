@@ -104,6 +104,49 @@ Exemplos:
 	},
 }
 
+// validateFlag valida se um valor está em uma lista de valores válidos
+func validateFlag(value, flagName string, validValues []string, caseSensitive bool) error {
+	for _, valid := range validValues {
+		if caseSensitive && value == valid {
+			return nil
+		}
+		if !caseSensitive && strings.EqualFold(value, valid) {
+			return nil
+		}
+	}
+	return fmt.Errorf("valor inválido para --%s: '%s'. Use: %s", flagName, value, strings.Join(validValues, "/"))
+}
+
+// validateConfirmFlags valida todas as flags do comando confirm
+func validateConfirmFlags(cmd *cobra.Command) error {
+	yesFlag, _ := cmd.Flags().GetString("yes")
+	if err := validateFlag(yesFlag, "yes", []string{"y", "n", "yes", "no"}, false); err != nil {
+		return err
+	}
+
+	mode, _ := cmd.Flags().GetString("mode")
+	if err := validateFlag(mode, "mode", []string{"interactive", "batch"}, true); err != nil {
+		return err
+	}
+
+	priority, _ := cmd.Flags().GetString("priority")
+	if err := validateFlag(priority, "priority", []string{"low", "medium", "high"}, true); err != nil {
+		return err
+	}
+
+	environment, _ := cmd.Flags().GetString("environment")
+	if err := validateFlag(environment, "environment", []string{"dev", "staging", "prod"}, true); err != nil {
+		return err
+	}
+
+	format, _ := cmd.Flags().GetString("format")
+	if err := validateFlag(format, "format", []string{"json", "xml", "yaml"}, true); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func init() {
 	rootCmd.AddCommand(confirmCmd)
 
@@ -132,54 +175,6 @@ func init() {
 
 	// Adicionar validação customizada
 	confirmCmd.PreRunE = func(cmd *cobra.Command, args []string) error {
-		// Validar flag yes
-		yesFlag, _ := cmd.Flags().GetString("yes")
-		validYes := []string{"y", "n", "yes", "no"}
-		for _, valid := range validYes {
-			if strings.ToLower(yesFlag) == valid {
-				return nil
-			}
-		}
-		return fmt.Errorf("valor inválido para --yes: '%s'. Use: y/n ou yes/no", yesFlag)
-
-		// Validar flag mode
-		mode, _ := cmd.Flags().GetString("mode")
-		validModes := []string{"interactive", "batch"}
-		for _, valid := range validModes {
-			if mode == valid {
-				return nil
-			}
-		}
-		return fmt.Errorf("valor inválido para --mode: '%s'. Use: interactive/batch", mode)
-
-		// Validar flag priority
-		priority, _ := cmd.Flags().GetString("priority")
-		validPriorities := []string{"low", "medium", "high"}
-		for _, valid := range validPriorities {
-			if priority == valid {
-				return nil
-			}
-		}
-		return fmt.Errorf("valor inválido para --priority: '%s'. Use: low/medium/high", priority)
-
-		// Validar flag environment
-		environment, _ := cmd.Flags().GetString("environment")
-		validEnvironments := []string{"dev", "staging", "prod"}
-		for _, valid := range validEnvironments {
-			if environment == valid {
-				return nil
-			}
-		}
-		return fmt.Errorf("valor inválido para --environment: '%s'. Use: dev/staging/prod", environment)
-
-		// Validar flag format
-		format, _ := cmd.Flags().GetString("format")
-		validFormats := []string{"json", "xml", "yaml"}
-		for _, valid := range validFormats {
-			if format == valid {
-				return nil
-			}
-		}
-		return fmt.Errorf("valor inválido para --format: '%s'. Use: json/xml/yaml", format)
+		return validateConfirmFlags(cmd)
 	}
 }
