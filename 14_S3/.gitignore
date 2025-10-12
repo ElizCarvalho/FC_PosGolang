@@ -1,0 +1,13 @@
+# Arquivos gerados
+arquivo-local.txt
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+
