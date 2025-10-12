@@ -55,6 +55,9 @@ course-cli
     ├── --priority [low/medium/high] (padrão: medium)
     ├── --environment [dev/staging/prod] (padrão: dev)
     └── --format [json/xml/yaml] (padrão: json)
+└── hooks (demonstração de hooks do Cobra)
+    ├── --name [string] (exemplo de hook)
+    └── subcommand --value [string] (herança de hooks)
 ```
 
 ## 🏷️ Flags Locais vs Globais
@@ -247,6 +250,133 @@ cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
     return fmt.Errorf("valor inválido para --yes: '%s'. Use: y/n ou yes/no", yesFlag)
 }
 ```
+
+## 🪝 Hooks do Cobra
+
+### O que são Hooks?
+
+**Hooks** são funções que são executadas em **momentos específicos** do ciclo de vida dos comandos Cobra. Eles permitem executar código antes, durante e depois da execução dos comandos.
+
+### Tipos de Hooks Disponíveis
+
+#### **1. Hooks Básicos (Apenas do comando atual)**
+
+**PreRun** - Antes da execução
+```go
+cmd.PreRun = func(cmd *cobra.Command, args []string) {
+    fmt.Println("🚀 Preparando execução...")
+}
+```
+
+**Run** - Execução principal
+```go
+cmd.Run = func(cmd *cobra.Command, args []string) {
+    fmt.Println("🎯 Executando comando principal...")
+}
+```
+
+**PostRun** - Após a execução
+```go
+cmd.PostRun = func(cmd *cobra.Command, args []string) {
+    fmt.Println("🏁 Finalizando...")
+}
+```
+
+#### **2. Hooks Persistentes (Herdados por subcomandos)**
+
+**PersistentPreRun** - Antes de qualquer comando
+```go
+cmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+    fmt.Println("🌐 Inicialização global...")
+}
+```
+
+**PersistentPostRun** - Após qualquer comando
+```go
+cmd.PersistentPostRun = func(cmd *cobra.Command, args []string) {
+    fmt.Println("🌐 Finalização global...")
+}
+```
+
+#### **3. Hooks com Tratamento de Erro**
+
+**PreRunE** - PreRun com erro
+```go
+cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
+    if name == "erro" {
+        return fmt.Errorf("❌ Nome 'erro' não é permitido")
+    }
+    return nil
+}
+```
+
+**PostRunE** - PostRun com erro
+```go
+cmd.PostRunE = func(cmd *cobra.Command, args []string) error {
+    // Lógica que pode falhar
+    return nil
+}
+```
+
+### Ordem de Execução dos Hooks
+
+```
+1. PersistentPreRun (global)
+2. PreRunE (validação com erro)
+3. PreRun (preparação)
+4. Run (execução principal)
+5. PostRunE (finalização com erro)
+6. PostRun (finalização)
+7. PersistentPostRun (global)
+```
+
+### Casos de Uso dos Hooks
+
+#### **1. Inicialização de Recursos**
+```go
+cmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+    // Conectar ao banco de dados
+    // Carregar configurações
+    // Inicializar logs
+}
+```
+
+#### **2. Validação de Entrada**
+```go
+cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
+    // Validar argumentos
+    // Verificar permissões
+    // Validar flags
+    return nil
+}
+```
+
+#### **3. Logging e Auditoria**
+```go
+cmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+    log.Printf("Comando executado: %s", cmd.Name())
+    log.Printf("Argumentos: %v", args)
+}
+```
+
+#### **4. Limpeza de Recursos**
+```go
+cmd.PersistentPostRun = func(cmd *cobra.Command, args []string) {
+    // Fechar conexões
+    // Salvar logs
+    // Limpar cache
+}
+```
+
+### Benefícios dos Hooks
+
+1. **Separação de responsabilidades** - Código organizado
+2. **Reutilização** - Hooks persistentes são herdados
+3. **Validação** - PreRunE para validações
+4. **Logging** - Rastreamento de execução
+5. **Inicialização** - Setup automático
+6. **Limpeza** - Cleanup automático
+7. **Tratamento de erro** - Controle de falhas
 
 ## 🔗 Comandos Encadeados
 
@@ -445,6 +575,22 @@ go build -o course-cli .
 ./course-cli confirm --yes yes --mode interactive --priority low --format yaml
 ```
 
+### Demonstração de Hooks
+
+```bash
+# Comando principal com hooks
+./course-cli hooks --name "João"
+# Executa: PersistentPreRun → PreRunE → PreRun → Run → PostRunE → PostRun → PersistentPostRun
+
+# Subcomando que herda hooks persistentes
+./course-cli hooks subcommand --value "Exemplo"
+# Executa: PersistentPreRun → Run → PersistentPostRun
+
+# Exemplo de validação com erro
+./course-cli hooks --name "erro"
+# ❌ Falha no PreRunE: Nome 'erro' não é permitido
+```
+
 ## 🧪 Testes
 
 ### Executar Testes
@@ -521,6 +667,7 @@ make help           # Mostra todos os comandos disponíveis
 │   ├── config.go          # Comandos de configuração (flags locais/globais)
 │   ├── confirm.go         # Flags com opções específicas (yes/no)
 │   ├── demo.go            # Demonstração de tipos de flags
+│   ├── hooks.go           # Demonstração de hooks do Cobra
 │   ├── ping.go            # Comando ping com flag
 │   ├── ping_test.go       # Testes de ping
 │   ├── project.go         # Comando principal de projeto
