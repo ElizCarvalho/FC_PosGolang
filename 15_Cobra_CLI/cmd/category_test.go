@@ -43,6 +43,7 @@ func TestCreateCmdValidation(t *testing.T) {
 
 	if cmd == nil {
 		t.Error("createCmd should not be nil")
+		return
 	}
 
 	// Teste que o comando requer exatamente 2 argumentos
@@ -62,6 +63,7 @@ func TestGetCmdValidation(t *testing.T) {
 
 	if cmd == nil {
 		t.Error("getCmd should not be nil")
+		return
 	}
 
 	// Teste que o comando requer exatamente 1 argumento
@@ -81,6 +83,7 @@ func TestUpdateCmdValidation(t *testing.T) {
 
 	if cmd == nil {
 		t.Error("updateCmd should not be nil")
+		return
 	}
 
 	// Teste que o comando requer exatamente 3 argumentos
@@ -100,6 +103,7 @@ func TestDeleteCmdValidation(t *testing.T) {
 
 	if cmd == nil {
 		t.Error("deleteCmd should not be nil")
+		return
 	}
 
 	// Teste que o comando requer exatamente 1 argumento
@@ -119,6 +123,7 @@ func TestListCmdNoArgs(t *testing.T) {
 
 	if cmd == nil {
 		t.Error("listCmd should not be nil")
+		return
 	}
 
 	// Teste que o comando não tem validação de argumentos (aceita 0)
