@@ -229,6 +229,13 @@ grpcurl -plaintext -d '{
 grpcurl -plaintext localhost:50051 pb.CategoryService.ListCategories
 ```
 
+#### Buscar Categoria por ID
+
+```bash
+# Buscar categoria específica por ID
+grpcurl -plaintext -d '{"id": "CATEGORY_ID"}' localhost:50051 pb.CategoryService.GetCategory
+```
+
 #### Exemplo de Resposta - CreateCategory
 
 ```json
@@ -260,6 +267,18 @@ grpcurl -plaintext localhost:50051 pb.CategoryService.ListCategories
 }
 ```
 
+#### Exemplo de Resposta - GetCategory
+
+```json
+{
+  "category": {
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "name": "Backend",
+    "description": "Cursos de desenvolvimento backend"
+  }
+}
+```
+
 ### 2. Usando Makefile (Mais Fácil)
 
 ```bash
@@ -271,6 +290,9 @@ make test-category-methods
 
 # Listar categorias
 make test-list
+
+# Buscar categoria por ID
+make test-get
 
 # Criar categoria
 make test-create

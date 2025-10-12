@@ -42,6 +42,11 @@ test-list: ## Testa listagem de categorias
 	@echo "$(BLUE)🧪 Testando listagem de categorias...$(NC)"
 	@grpcurl -plaintext localhost:$(PORT) pb.CategoryService.ListCategories
 
+test-get: ## Testa busca de categoria por ID
+	@echo "$(BLUE)🧪 Testando busca de categoria por ID...$(NC)"
+	@echo "Exemplo: grpcurl -plaintext -d '{\"id\": \"780c5d43-eccd-4267-a03b-3bc728db4c09\"}' localhost:$(PORT) pb.CategoryService.GetCategory"
+	@echo "Substitua CATEGORY_ID pelo ID de uma categoria existente"
+
 test-services: ## Lista todos os serviços disponíveis
 	@echo "$(BLUE)🔍 Listando serviços disponíveis...$(NC)"
 	@grpcurl -plaintext localhost:$(PORT) list
@@ -65,6 +70,7 @@ interactive-test: ## Teste interativo com grpcurl
 	@echo "  grpcurl -plaintext localhost:$(PORT) list pb.CategoryService"
 	@echo "  grpcurl -plaintext localhost:$(PORT) pb.CategoryService.ListCategories"
 	@echo "  grpcurl -plaintext -d '{\"name\": \"Teste\", \"description\": \"Teste\"}' localhost:$(PORT) pb.CategoryService.CreateCategory"
+	@echo "  grpcurl -plaintext -d '{\"id\": \"CATEGORY_ID\"}' localhost:$(PORT) pb.CategoryService.GetCategory"
 	@bash
 
 clean: ## Limpa arquivos temporários
