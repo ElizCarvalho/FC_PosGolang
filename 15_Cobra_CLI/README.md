@@ -4,14 +4,18 @@ Uma CLI completa desenvolvida em Go usando a biblioteca Cobra, demonstrando coma
 
 ## 📋 Índice
 
-- [Sobre o Projeto](#sobre-o-projeto)
-- [Estrutura de Comandos](#estrutura-de-comandos)
-- [Comandos Encadeados](#comandos-encadeados)
-- [Instalação e Uso](#instalação-e-uso)
-- [Exemplos de Uso](#exemplos-de-uso)
-- [Testes](#testes)
-- [Makefile](#makefile)
-- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Sobre o Projeto](#-sobre-o-projeto)
+- [Estrutura de Comandos](#-estrutura-de-comandos)
+- [Flags Locais vs Globais](#️-flags-locais-vs-globais)
+- [Manipulação de Flags](#️-manipulação-de-flags)
+- [Hooks do Cobra](#-hooks-do-cobra)
+- [Comandos Encadeados](#-comandos-encadeados)
+- [Instalação e Uso](#-instalação-e-uso)
+- [Exemplos de Uso](#-exemplos-de-uso)
+- [Padrão RunEFunc](#-padrão-runefunc---tratamento-elegante-de-erros)
+- [Testes](#-testes)
+- [Makefile](#-makefile)
+- [Estrutura do Projeto](#-estrutura-do-projeto)
 
 ## 🎯 Sobre o Projeto
 
@@ -24,7 +28,7 @@ Este projeto demonstra como criar uma CLI robusta em Go usando a biblioteca Cobr
 
 ## 🔗 Estrutura de Comandos
 
-```
+```bash
 course-cli
 ├── category (comandos de categoria)
 │   ├── create [name] [description]
@@ -65,11 +69,13 @@ course-cli
 ### Flags Locais (Local Flags)
 
 **Características:**
+
 - Aplicam-se **apenas ao comando específico**
 - Não são herdadas por subcomandos
 - Cada comando tem suas próprias flags
 
 **Exemplo:**
+
 ```go
 // Flags locais para um comando específico
 configSetCmd.Flags().String("key", "", "Chave da configuração")
@@ -77,6 +83,7 @@ configSetCmd.Flags().String("value", "", "Valor da configuração")
 ```
 
 **Uso:**
+
 ```bash
 # --key e --value são locais do comando 'set'
 course-cli config set --key "debug_mode" --value "true"
@@ -85,17 +92,20 @@ course-cli config set --key "debug_mode" --value "true"
 ### Flags Globais (Persistent Flags)
 
 **Características:**
+
 - Aplicam-se ao **comando e todos os seus subcomandos**
 - São herdadas automaticamente
 - Úteis para configurações gerais
 
 **Exemplo:**
+
 ```go
 // Flag global --verbose - disponível em TODOS os subcomandos
 configCmd.PersistentFlags().Bool("verbose", false, "Modo verboso")
 ```
 
 **Uso:**
+
 ```bash
 # --verbose funciona em TODOS os subcomandos de config
 course-cli config list --verbose
@@ -112,11 +122,13 @@ course-cli config set --key "test" --value "value" --verbose
 ### Quando Usar
 
 **Use Flags Locais quando:**
+
 - A flag é específica de um comando
 - Não faz sentido em outros comandos
 - Exemplo: `--force` só para reset, `--key` só para set/get
 
 **Use Flags Globais quando:**
+
 - A flag é útil em vários comandos
 - É uma configuração geral
 - Exemplo: `--verbose`, `--debug`, `--output-format`
@@ -126,66 +138,82 @@ course-cli config set --key "test" --value "value" --verbose
 ### Tipos de Flags Disponíveis
 
 #### 1. **STRING** - Texto
+
 ```go
 cmd.Flags().String("name", "", "Nome da pessoa")
 ```
+
 ```bash
 --name "João"
 ```
 
 #### 2. **INT** - Números Inteiros
+
 ```go
 cmd.Flags().Int("age", 0, "Idade da pessoa")
 ```
+
 ```bash
 --age 25
 ```
 
 #### 3. **BOOL** - Valores Booleanos
+
 ```go
 cmd.Flags().Bool("active", false, "Status ativo/inativo")
 ```
+
 ```bash
 --active
 ```
 
 #### 4. **FLOAT64** - Números Decimais
+
 ```go
 cmd.Flags().Float64("price", 0.0, "Preço do produto")
 ```
+
 ```bash
 --price 99.99
 ```
 
 #### 5. **DURATION** - Duração de Tempo
+
 ```go
 cmd.Flags().Duration("timeout", 30*time.Second, "Timeout para operações")
 ```
+
 ```bash
 --timeout 1m
 --timeout 30s
 ```
 
 #### 6. **STRING SLICE** - Múltiplos Textos
+
 ```go
 cmd.Flags().StringSlice("tags", []string{}, "Tags para categorização")
 ```
+
 ```bash
 --tags "go,cli,demo"
 ```
 
 #### 7. **INT SLICE** - Múltiplos Números
+
 ```go
 cmd.Flags().IntSlice("ports", []int{}, "Lista de portas")
 ```
+
 ```bash
 --ports 80,443,8080
 ```
 
 #### 8. **BOOL SLICE** - Múltiplos Booleanos
+
 ```go
 cmd.Flags().BoolSlice("features", []bool{}, "Lista de features ativadas")
 ```
+
 ```bash
 --features true,false,true
 ```
@@ -193,6 +221,7 @@ cmd.Flags().BoolSlice("features", []bool{}, "Lista de features ativadas")
 ### Técnicas de Manipulação
 
 #### **Obter Valores das Flags**
+
 ```go
 name, _ := cmd.Flags().GetString("name")
 age, _ := cmd.Flags().GetInt("age")
@@ -200,6 +229,7 @@ active, _ := cmd.Flags().GetBool("active")
 ```
 
 #### **Verificar se Flag foi Fornecida**
+
 ```go
 if cmd.Flags().Changed("name") {
     // Flag foi fornecida
@@ -207,17 +237,20 @@ if cmd.Flags().Changed("name") {
 ```
 
 #### **Flags Obrigatórias**
+
 ```go
 cmd.MarkFlagRequired("name")
 ```
 
 #### **Flags com Shortcuts**
+
 ```go
 cmd.Flags().StringP("output", "o", "", "Arquivo de saída")
 cmd.Flags().BoolP("force", "f", false, "Forçar operação")
 ```
 
 #### **Validação de Valores**
+
 ```go
 if age < 0 || age > 150 {
     fmt.Println("❌ Idade deve estar entre 0 e 150 anos")
@@ -228,16 +261,19 @@ if age < 0 || age > 150 {
 ### Flags com Opções Específicas
 
 #### **Exemplo: Yes/No com Valor Padrão**
+
 ```go
 cmd.Flags().String("yes", "y", "Confirmação (y/n ou yes/no) - padrão: y")
 ```
 
 **Comportamento:**
+
 - ✅ **Valor padrão**: `y` (sim)
 - ✅ **Aceita**: `y`, `n`, `yes`, `no`
 - ❌ **Rejeita**: `maybe`, `talvez`, etc.
 
 #### **Validação Personalizada**
+
 ```go
 cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
     yesFlag, _ := cmd.Flags().GetString("yes")
@@ -262,6 +298,7 @@ cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
 #### **1. Hooks Básicos (Apenas do comando atual)**
 
 **PreRun** - Antes da execução
+
 ```go
 cmd.PreRun = func(cmd *cobra.Command, args []string) {
     fmt.Println("🚀 Preparando execução...")
@@ -269,6 +306,7 @@ cmd.PreRun = func(cmd *cobra.Command, args []string) {
 ```
 
 **Run** - Execução principal
+
 ```go
 cmd.Run = func(cmd *cobra.Command, args []string) {
     fmt.Println("🎯 Executando comando principal...")
@@ -276,6 +314,7 @@ cmd.Run = func(cmd *cobra.Command, args []string) {
 ```
 
 **PostRun** - Após a execução
+
 ```go
 cmd.PostRun = func(cmd *cobra.Command, args []string) {
     fmt.Println("🏁 Finalizando...")
@@ -285,6 +324,7 @@ cmd.PostRun = func(cmd *cobra.Command, args []string) {
 #### **2. Hooks Persistentes (Herdados por subcomandos)**
 
 **PersistentPreRun** - Antes de qualquer comando
+
 ```go
 cmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
     fmt.Println("🌐 Inicialização global...")
@@ -292,6 +332,7 @@ cmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
 ```
 
 **PersistentPostRun** - Após qualquer comando
+
 ```go
 cmd.PersistentPostRun = func(cmd *cobra.Command, args []string) {
     fmt.Println("🌐 Finalização global...")
@@ -301,6 +342,7 @@ cmd.PersistentPostRun = func(cmd *cobra.Command, args []string) {
 #### **3. Hooks com Tratamento de Erro**
 
 **PreRunE** - PreRun com erro
+
 ```go
 cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
     if name == "erro" {
@@ -311,6 +353,7 @@ cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
 ```
 
 **PostRunE** - PostRun com erro
+
 ```go
 cmd.PostRunE = func(cmd *cobra.Command, args []string) error {
     // Lógica que pode falhar
@@ -320,7 +363,7 @@ cmd.PostRunE = func(cmd *cobra.Command, args []string) error {
 
 ### Ordem de Execução dos Hooks
 
-```
+```bash
 1. PersistentPreRun (global)
 2. PreRunE (validação com erro)
 3. PreRun (preparação)
@@ -333,6 +376,7 @@ cmd.PostRunE = func(cmd *cobra.Command, args []string) error {
 ### Casos de Uso dos Hooks
 
 #### **1. Inicialização de Recursos**
+
 ```go
 cmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
     // Conectar ao banco de dados
@@ -342,6 +386,7 @@ cmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
 ```
 
 #### **2. Validação de Entrada**
+
 ```go
 cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
     // Validar argumentos
@@ -352,6 +397,7 @@ cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
 ```
 
 #### **3. Logging e Auditoria**
+
 ```go
 cmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
     log.Printf("Comando executado: %s", cmd.Name())
@@ -360,6 +406,7 @@ cmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
 ```
 
 #### **4. Limpeza de Recursos**
+
 ```go
 cmd.PersistentPostRun = func(cmd *cobra.Command, args []string) {
     // Fechar conexões
@@ -558,7 +605,7 @@ go build -o course-cli .
 ./course-cli demo --age 25  # ❌ Erro: flag obrigatória não fornecida
 ```
 
-### Flags com Opções Específicas
+### Exemplos de Flags com Opções Específicas
 
 ```bash
 # Usando valores padrão
@@ -600,6 +647,7 @@ O **RunEFunc** é um padrão elegante para tratar erros em comandos Cobra, separ
 ### Estrutura do Padrão
 
 #### **1. Tipos Personalizados**
+
 ```go
 // RunEFunc é um tipo personalizado para funções que retornam erro
 type RunEFunc func(cmd *cobra.Command, args []string) error
@@ -609,6 +657,7 @@ type HandlerFunc func(args []string) error
 ```
 
 #### **2. Funções Auxiliares**
+
 ```go
 // RunEWithErrorHandling executa uma função RunE com tratamento elegante de erro
 func RunEWithErrorHandling(fn RunEFunc) func(cmd *cobra.Command, args []string) {
@@ -631,6 +680,7 @@ func CreateHandler(handler HandlerFunc) RunEFunc {
 ### Como Usar
 
 #### **Antes (Deselegante)**
+
 ```go
 var createCmd = &cobra.Command{
     Use: "create",
@@ -650,6 +700,7 @@ var createCmd = &cobra.Command{
 ```
 
 #### **Depois (Elegante)**
+
 ```go
 // Handler separado (lógica de negócio)
 func createCategoryHandler(args []string) error {
@@ -753,7 +804,7 @@ make test-race
 
 ### Estrutura de Testes
 
-```
+```bash
 cmd/
 ├── category_test.go    # Testes para comandos de categoria
 ├── ping_test.go        # Testes para comando ping
@@ -801,7 +852,7 @@ make help           # Mostra todos os comandos disponíveis
 
 ## 📁 Estrutura do Projeto
 
-```
+```bash
 15_Cobra_CLI/
 ├── cmd/                    # Comandos da CLI
 │   ├── category.go         # Comandos de categoria (CRUD)
