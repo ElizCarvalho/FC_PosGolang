@@ -15,22 +15,22 @@ var pingCmd = &cobra.Command{
 	Short: "Retorna 'pong' para testar a conexão",
 	Long: `Comando simples que retorna 'pong' quando chamado.
 	
-Útil para testar se a CLI está funcionando corretamente.`,
+Útil para testar se a CLI está funcionando corretamente.
+Use a flag --pong para retornar 'pong pong'.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("pong")
+		pongFlag, _ := cmd.Flags().GetBool("pong")
+
+		if pongFlag {
+			fmt.Println("pong pong")
+		} else {
+			fmt.Println("pong")
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(pingCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// pingCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// pingCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// Adicionar flag --pong
+	pingCmd.Flags().Bool("pong", false, "Retorna 'pong pong' em vez de apenas 'pong'")
 }
