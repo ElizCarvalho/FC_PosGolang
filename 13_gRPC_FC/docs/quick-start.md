@@ -26,22 +26,26 @@ go run cmd/grpcServer/main.go
 ### 2️⃣ Testar os Endpoints
 
 **Listar serviços disponíveis:**
+
 ```bash
 grpcurl -plaintext localhost:50051 list pb.CategoryService
 ```
 
 **Criar uma categoria (Unary):**
+
 ```bash
 grpcurl -plaintext -d '{"name": "Backend", "description": "Desenvolvimento backend"}' \
   localhost:50051 pb.CategoryService.CreateCategory
 ```
 
 **Server-Side Streaming:**
+
 ```bash
 make test-stream
 ```
 
 **Bidirectional Streaming:**
+
 ```bash
 make test-bidi
 ```
@@ -50,7 +54,7 @@ make test-bidi
 
 ### 1. Unary RPC (tradicional)
 
-```
+```mermaid
 Cliente → (1 request) → Servidor
         ← (1 response) ←
 ```
@@ -59,7 +63,7 @@ Cliente → (1 request) → Servidor
 
 ### 2. Server-Side Streaming
 
-```
+```mermaid
 Cliente → (1 request) → Servidor
         ← (N responses) ←
 ```
@@ -72,7 +76,7 @@ Cliente → (1 request) → Servidor
 
 ### 3. Bidirectional Streaming
 
-```
+```mermaid
 Cliente ⇄ (N requests/responses) ⇄ Servidor
 ```
 
@@ -96,7 +100,8 @@ make test-stream
 ```
 
 **Saída:**
-```
+
+```bash
 📦 Lote 1 recebido: 3 categorias
 📦 Lote 2 recebido: 3 categorias
 📦 Lote 3 recebido: 3 categorias
@@ -115,7 +120,8 @@ make test-bidi
 ```
 
 **Saída:**
-```
+
+```bash
 📤 [1] Enviando: Backend
 📥 [1] Recebido: Backend (ID: xxx)
 📤 [2] Enviando: Frontend
@@ -213,4 +219,3 @@ sqlite3 db.dbgrpc "CREATE TABLE IF NOT EXISTS categories (id TEXT PRIMARY KEY, n
 - [Documentação gRPC](https://grpc.io/docs/)
 - [Protocol Buffers](https://protobuf.dev/)
 - [gRPC Go Tutorial](https://grpc.io/docs/languages/go/basics/)
-
