@@ -147,3 +147,5 @@ fabric.properties
 
 # Aula de RabbitMQ
 /9_Eventos/data/
+
+/16_SQLC/data/
