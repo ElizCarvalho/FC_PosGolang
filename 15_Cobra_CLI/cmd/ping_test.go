@@ -119,6 +119,7 @@ func TestPingCmdFlagExists(t *testing.T) {
 	flag := cmd.Flags().Lookup("pong")
 	if flag == nil {
 		t.Error("Flag 'pong' should exist")
+		return
 	}
 
 	if flag.Name != "pong" {
