@@ -39,7 +39,73 @@ course-cli
 │       ├── add [description]
 │       ├── list
 │       └── complete [id]
+├── config (comandos de configuração)
+│   ├── set --key [key] --value [value] (flags locais)
+│   ├── get --key [key] (flags locais)
+│   ├── list --verbose (flag global)
+│   └── reset --force --verbose (flags locais + global)
 ```
+
+## 🏷️ Flags Locais vs Globais
+
+### Flags Locais (Local Flags)
+
+**Características:**
+- Aplicam-se **apenas ao comando específico**
+- Não são herdadas por subcomandos
+- Cada comando tem suas próprias flags
+
+**Exemplo:**
+```go
+// Flags locais para um comando específico
+configSetCmd.Flags().String("key", "", "Chave da configuração")
+configSetCmd.Flags().String("value", "", "Valor da configuração")
+```
+
+**Uso:**
+```bash
+# --key e --value são locais do comando 'set'
+course-cli config set --key "debug_mode" --value "true"
+```
+
+### Flags Globais (Persistent Flags)
+
+**Características:**
+- Aplicam-se ao **comando e todos os seus subcomandos**
+- São herdadas automaticamente
+- Úteis para configurações gerais
+
+**Exemplo:**
+```go
+// Flag global --verbose - disponível em TODOS os subcomandos
+configCmd.PersistentFlags().Bool("verbose", false, "Modo verboso")
+```
+
+**Uso:**
+```bash
+# --verbose funciona em TODOS os subcomandos de config
+course-cli config list --verbose
+course-cli config set --key "test" --value "value" --verbose
+```
+
+### Comparação
+
+| Tipo | Escopo | Herança | Exemplo |
+|------|--------|---------|---------|
+| **Local** | Apenas o comando | ❌ Não | `--key`, `--value`, `--force` |
+| **Global** | Comando + subcomandos | ✅ Sim | `--verbose`, `--debug` |
+
+### Quando Usar
+
+**Use Flags Locais quando:**
+- A flag é específica de um comando
+- Não faz sentido em outros comandos
+- Exemplo: `--force` só para reset, `--key` só para set/get
+
+**Use Flags Globais quando:**
+- A flag é útil em vários comandos
+- É uma configuração geral
+- Exemplo: `--verbose`, `--debug`, `--output-format`
 
 ## 🔗 Comandos Encadeados
 
@@ -187,6 +253,22 @@ go build -o course-cli .
 
 # Completar tarefa
 ./course-cli project task complete 1
+```
+
+### Comandos de Configuração (Exemplo de Flags)
+
+```bash
+# Definir configuração (flags locais)
+./course-cli config set --key "database_url" --value "sqlite://db.sqlite"
+
+# Obter configuração (flags locais)
+./course-cli config get --key "database_url"
+
+# Listar configurações (flag global --verbose)
+./course-cli config list --verbose
+
+# Resetar configurações (flags locais + global)
+./course-cli config reset --force --verbose
 ```
 
 ## 🧪 Testes
