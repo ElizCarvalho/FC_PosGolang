@@ -62,6 +62,10 @@ docker-logs: ## Mostra logs do MySQL
 	@echo "$(BLUE)📋 Logs do MySQL:$(NC)"
 	@docker compose logs mysql
 
+docker-exec: ## Executa comando no MySQL
+	@echo "$(BLUE)📋 Executando comando no MySQL:$(NC)"
+	@docker compose exec mysql bash -c "mysql -uroot -p$(DB_PASSWORD) $(DB_NAME)"
+
 docker-reset: ## Reseta dados do MySQL (CUIDADO!)
 	@echo "$(RED)⚠️  ATENÇÃO: Isso vai apagar todos os dados!$(NC)"
 	@docker compose down -v
