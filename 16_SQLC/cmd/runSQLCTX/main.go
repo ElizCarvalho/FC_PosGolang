@@ -90,24 +90,31 @@ func main() {
 	}
 	defer conn.Close()
 
-	//queries := db.New(conn)
-
 	courseArgs := CourseParams{
 		ID:          uuid.New().String(),
-		Name:        "Curso de Backend Golang",
-		Description: sql.NullString{String: "Curso de Backend Golang", Valid: true},
+		Name:        "Curso de Backend C#",
+		Description: sql.NullString{String: "Curso de Backend C#", Valid: true},
 		Price:       100.00,
 	}
 	categoryArgs := CategoryParams{
 		ID:          uuid.New().String(),
-		Name:        "Backend",
-		Description: sql.NullString{String: "Curso de Backend Golang", Valid: true},
+		Name:        "Backend C#",
+		Description: sql.NullString{String: "Curso de Backend C#", Valid: true},
 	}
 
 	courseDB := NewCourseDB(conn)
 	err = courseDB.CreateCourseAndCategory(ctx, categoryArgs, courseArgs)
 	if err != nil {
 		panic(err)
+	}
+
+	queries := db.New(conn)
+	courses, err := queries.ListCourses(ctx)
+	if err != nil {
+		panic(err)
+	}
+	for _, course := range courses {
+		fmt.Printf("ID: %s, Name: %s, Description: %s, Price: %f, CategoryName: %s\n", course.ID, course.Name, course.Description.String, course.Price, course.CategoryName)
 	}
 
 }
