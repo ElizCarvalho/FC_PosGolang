@@ -71,11 +71,11 @@ db-reset: ## Reseta o banco de dados
 
 db-migrate: ## Executa as migrações
 	@echo "$(BLUE)📊 Executando migrações...$(NC)"
-	@mysql -h $(DB_HOST) -P $(DB_PORT) -u $(DB_USER) -p$(DB_PASS) $(DB_NAME) < sql/schema.sql
+	@docker exec -i mysql mysql -u $(DB_USER) -p$(DB_PASS) $(DB_NAME) < sql/schema.sql
 
 db-shell: ## Acessa o shell do MySQL
 	@echo "$(BLUE)🐚 Acessando shell do MySQL...$(NC)"
-	@mysql -h $(DB_HOST) -P $(DB_PORT) -u $(DB_USER) -p$(DB_PASS) $(DB_NAME)
+	@docker exec -it mysql mysql -u $(DB_USER) -p$(DB_PASS) $(DB_NAME)
 
 # ==============================================================================
 # Comandos Docker
