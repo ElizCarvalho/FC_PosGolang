@@ -4,6 +4,11 @@
 APP_NAME=uow-demo
 VERSION?=latest
 PORT?=3306
+DB_HOST?=localhost
+DB_PORT?=3306
+DB_USER?=root
+DB_PASS?=root
+DB_NAME?=courses
 
 # Cores
 BLUE=\033[0;34m
@@ -66,11 +71,11 @@ db-reset: ## Reseta o banco de dados
 
 db-migrate: ## Executa as migrações
 	@echo "$(BLUE)📊 Executando migrações...$(NC)"
-	@mysql -h localhost -P 3306 -u root -proot courses < sql/schema.sql
+	@mysql -h $(DB_HOST) -P $(DB_PORT) -u $(DB_USER) -p$(DB_PASS) $(DB_NAME) < sql/schema.sql
 
 db-shell: ## Acessa o shell do MySQL
 	@echo "$(BLUE)🐚 Acessando shell do MySQL...$(NC)"
-	@mysql -h localhost -P 3306 -u root -proot courses
+	@mysql -h $(DB_HOST) -P $(DB_PORT) -u $(DB_USER) -p$(DB_PASS) $(DB_NAME)
 
 # ==============================================================================
 # Comandos Docker

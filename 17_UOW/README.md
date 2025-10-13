@@ -35,8 +35,16 @@ go mod tidy
 # Suba o MySQL via Docker
 docker-compose up -d
 
-# Execute as migrações
-mysql -h localhost -P 3306 -u root -proot courses < sql/schema.sql
+# Execute as migrações (usando variáveis de ambiente)
+DB_HOST=localhost DB_PORT=3306 DB_USER=root DB_PASS=root DB_NAME=courses make db-migrate
+
+# Ou configure as variáveis no seu ambiente
+export DB_HOST=localhost
+export DB_PORT=3306
+export DB_USER=root
+export DB_PASS=root
+export DB_NAME=courses
+make db-migrate
 ```
 
 4.**Gere o código SQLC** (se necessário):
