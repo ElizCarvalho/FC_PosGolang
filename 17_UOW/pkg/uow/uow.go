@@ -61,7 +61,7 @@ func (u *Uow) Do(ctx context.Context, fn func(Uow *Uow) error) error {
 		return err
 	}
 
-	u.Tx = tx
+	u.Tx = tx //esse é o cara que vai fazer o begin da transação
 	err = fn(u)
 	if err != nil {
 		errRb := u.Rollback()
