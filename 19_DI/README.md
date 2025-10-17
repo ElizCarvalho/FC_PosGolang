@@ -55,8 +55,19 @@ go install github.com/google/wire/cmd/wire@latest
 ### 3. Executar o projeto
 
 ```bash
+# Opção 1: Executar todos os arquivos Go
 go run .
+
+# Opção 2: Executar arquivos específicos (recomendado)
+go run main.go wire_gen.go
 ```
+
+**Por que usar arquivos específicos?**
+
+- **Controle preciso** sobre quais arquivos compilar
+- **Evita conflitos** com outros arquivos `.go` no diretório
+- **Garante** que apenas o código gerado seja usado
+- **Debugging** mais fácil quando há múltiplos arquivos
 
 ## 🏗️ Como funciona o Wire
 
@@ -160,13 +171,33 @@ wire
 ### Gerar e executar
 
 ```bash
+# Opção 1: Gerar e executar todos os arquivos
 wire && go run .
+
+# Opção 2: Gerar e executar arquivos específicos (recomendado)
+wire && go run main.go wire_gen.go
 ```
 
 ### Verificar dependências
 
 ```bash
 go mod tidy
+```
+
+### Comandos de Execução
+
+```bash
+# Executar apenas arquivos específicos
+go run main.go wire_gen.go
+
+# Executar todos os arquivos Go
+go run .
+
+# Compilar para binário
+go build -o app main.go wire_gen.go
+
+# Executar binário compilado
+./app
 ```
 
 ## ⚙️ Como o comando `wire` funciona
