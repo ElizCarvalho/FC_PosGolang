@@ -1,6 +1,9 @@
 package graph
 
-import "github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/usecase"
+import (
+	"github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/entity"
+	"github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/usecase"
+)
 
 // This file will not be regenerated automatically.
 //
@@ -8,4 +11,5 @@ import "github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/usecase"
 
 type Resolver struct {
 	CreateOrderUseCase usecase.CreateOrderUseCase
+	OrderRepository    entity.OrderRepositoryInterface
 }
