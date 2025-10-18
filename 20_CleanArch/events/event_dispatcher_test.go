@@ -135,14 +135,17 @@ func (suite *EventDispatcherTestSuite) TestEventDispatcher_Remove() {
 	suite.Nil(err)
 	suite.Equal(1, len(suite.eventDispatcher.handlers[suite.event2.GetName()]))
 
-	suite.eventDispatcher.Remove(suite.event.GetName(), &suite.handler)
+	err = suite.eventDispatcher.Remove(suite.event.GetName(), &suite.handler)
+	suite.Nil(err)
 	suite.Equal(1, len(suite.eventDispatcher.handlers[suite.event.GetName()]))
 	assert.Equal(suite.T(), &suite.handler2, suite.eventDispatcher.handlers[suite.event.GetName()][0])
 
-	suite.eventDispatcher.Remove(suite.event.GetName(), &suite.handler2)
+	err = suite.eventDispatcher.Remove(suite.event.GetName(), &suite.handler2)
+	suite.Nil(err)
 	suite.Equal(0, len(suite.eventDispatcher.handlers[suite.event.GetName()]))
 
-	suite.eventDispatcher.Remove(suite.event2.GetName(), &suite.handler3)
+	err = suite.eventDispatcher.Remove(suite.event2.GetName(), &suite.handler3)
+	suite.Nil(err)
 	suite.Equal(0, len(suite.eventDispatcher.handlers[suite.event2.GetName()]))
 }
 
@@ -162,10 +165,13 @@ func (suite *EventDispatcherTestSuite) TestEventDispatch_Dispatch() {
 	eh2 := &MockHandler{}
 	eh2.On("Handle", &suite.event)
 
-	suite.eventDispatcher.Register(suite.event.GetName(), eh)
-	suite.eventDispatcher.Register(suite.event.GetName(), eh2)
+	err := suite.eventDispatcher.Register(suite.event.GetName(), eh)
+	suite.Nil(err)
+	err = suite.eventDispatcher.Register(suite.event.GetName(), eh2)
+	suite.Nil(err)
 
-	suite.eventDispatcher.Dispatch(&suite.event)
+	err = suite.eventDispatcher.Dispatch(&suite.event)
+	suite.Nil(err)
 	eh.AssertExpectations(suite.T())
 	eh2.AssertExpectations(suite.T())
 	eh.AssertNumberOfCalls(suite.T(), "Handle", 1)
