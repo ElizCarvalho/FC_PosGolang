@@ -33,5 +33,10 @@ func (s *WebServer) Start() {
 	for path, handler := range s.Handlers {
 		s.Router.Handle(path, handler)
 	}
-	http.ListenAndServe(s.WebServerPort, s.Router)
+	// Adiciona : se não tiver
+	port := s.WebServerPort
+	if port[0] != ':' {
+		port = ":" + port
+	}
+	http.ListenAndServe(port, s.Router)
 }
