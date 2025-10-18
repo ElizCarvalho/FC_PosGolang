@@ -1,0 +1,7 @@
+.docker/*
+.env
+ordersystem
+*.exe
+*.dll
+*.so
+*.dylib
