@@ -24,6 +24,11 @@ func (m *MockOrderRepository) GetTotal() (int, error) {
 	return args.Int(0), args.Error(1)
 }
 
+func (m *MockOrderRepository) FindAll() ([]*entity.Order, error) {
+	args := m.Called()
+	return args.Get(0).([]*entity.Order), args.Error(1)
+}
+
 type MockEventDispatcher struct {
 	mock.Mock
 }
