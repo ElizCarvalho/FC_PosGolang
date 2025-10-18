@@ -1,0 +1,3 @@
+### Listar todas as orders via REST
+GET http://localhost:8080/orders
+
