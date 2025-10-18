@@ -39,7 +39,7 @@ setup: ## Configura o ambiente de desenvolvimento
 	@echo "$(GREEN)✓ protoc plugins instalados$(NC)"
 	@go install github.com/google/wire/cmd/wire@latest
 	@echo "$(GREEN)✓ wire instalado$(NC)"
-	@if [ ! -f .env ]; then cp env.example .env; echo "$(GREEN)✓ Arquivo .env criado$(NC)"; fi
+	@if [ ! -f cmd/ordersystem/.env ]; then cp env.example cmd/ordersystem/.env; echo "$(GREEN)✓ Arquivo .env criado$(NC)"; fi
 	@echo "$(GREEN)✅ Setup concluído!$(NC)"
 
 .PHONY: setup-tools
@@ -59,7 +59,7 @@ run: ## Executa a aplicação
 	@echo "$(YELLOW)Web Server: http://localhost:$(WEB_PORT)$(NC)"
 	@echo "$(YELLOW)gRPC Server: localhost:$(GRPC_PORT)$(NC)"
 	@echo "$(YELLOW)GraphQL Playground: http://localhost:$(GRAPHQL_PORT)$(NC)"
-	@go run ./cmd/ordersystem
+	@cd cmd/ordersystem && go run .
 
 .PHONY: run-dev
 run-dev: docker-up ## Sobe infraestrutura e executa a aplicação
