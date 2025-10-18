@@ -33,14 +33,20 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			fmt.Printf("Error closing database: %v\n", err)
+		}
+	}()
 
 	rabbitMQChannel := getRabbitMQChannel(configs.RabbitMQURL)
 
 	eventDispatcher := events.NewEventDispatcher()
-	eventDispatcher.Register("OrderCreated", &handler.OrderCreatedHandler{
+	if err := eventDispatcher.Register("OrderCreated", &handler.OrderCreatedHandler{
 		RabbitMQChannel: rabbitMQChannel,
-	})
+	}); err != nil {
+		panic(err)
+	}
 
 	createOrderUseCase := NewCreateOrderUseCase(db, eventDispatcher)
 
@@ -60,7 +66,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	go grpcServer.Serve(lis)
+	go func() {
+		if err := grpcServer.Serve(lis); err != nil {
+			fmt.Printf("Error starting gRPC server: %v\n", err)
+		}
+	}()
 
 	srv := graphql_handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
 		CreateOrderUseCase: *createOrderUseCase,
@@ -69,7 +79,9 @@ func main() {
 	http.Handle("/query", srv)
 
 	fmt.Println("Starting GraphQL server on port", configs.GraphQLServerPort)
-	http.ListenAndServe(":"+configs.GraphQLServerPort, nil)
+	if err := http.ListenAndServe(":"+configs.GraphQLServerPort, nil); err != nil {
+		panic(err)
+	}
 }
 
 func getRabbitMQChannel(rabbitMQURL string) *amqp.Channel {
