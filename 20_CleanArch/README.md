@@ -4,22 +4,161 @@
 
 ## 📌 Sobre
 
-Este projeto implementa um sistema de pedidos seguindo os princípios da Clean Architecture, com múltiplas interfaces (REST API, gRPC, GraphQL) e sistema de eventos usando RabbitMQ.
+Sistema de gerenciamento de pedidos que demonstra a aplicação de Clean Architecture em Go, oferecendo três interfaces diferentes para criação de pedidos:
+
+- **REST API** (HTTP/JSON)
+- **gRPC** (Protocol Buffers)
+- **GraphQL** (Queries e Mutations)
+
+Todos os pedidos criados são processados de forma assíncrona através de eventos publicados no RabbitMQ.
+
+## 🚀 Quick Start
+
+### 1. Setup Inicial
+
+```bash
+# Configurar ambiente e instalar dependências
+make setup
+
+# Subir infraestrutura (MySQL + RabbitMQ)
+make docker-up
+
+# Criar banco e tabelas
+make db-create db-migrate
+```
+
+### 2. Executar a Aplicação
+
+```bash
+# Iniciar a aplicação
+make run
+```
+
+A aplicação irá subir em três portas:
+
+- **REST API**: <http://localhost:8080>
+- **gRPC**: localhost:50051
+- **GraphQL**: <http://localhost:8082>
+
+## ✅ Validando as 3 Interfaces
+
+### Teste REST API
+
+```bash
+make test-http
+```
+
+Ou manualmente:
+
+```bash
+curl -X POST http://localhost:8080/order \
+  -H "Content-Type: application/json" \
+  -d '{"id":"order-001","price":100.0,"tax":10.0}'
+```
+
+**Resposta esperada:**
+
+```json
+{
+  "id": "order-001",
+  "price": 100.0,
+  "tax": 10.0,
+  "final_price": 110.0
+}
+```
+
+### Teste gRPC
+
+```bash
+make test-grpc
+```
+
+Ou com `grpcurl`:
+
+```bash
+grpcurl -plaintext -d '{"id":"order-002","price":200.0,"tax":20.0}' \
+  localhost:50051 pb.OrderService/CreateOrder
+```
+
+**Resposta esperada:**
+
+```json
+{
+  "id": "order-002",
+  "price": 200,
+  "tax": 20,
+  "final_price": 220
+}
+```
+
+### Teste GraphQL
+
+```bash
+make test-graphql
+```
+
+Ou acesse o playground em <http://localhost:8082> e execute:
+
+```graphql
+mutation {
+  createOrder(input: {
+    id: "order-003"
+    Price: 300.0
+    Tax: 30.0
+  }) {
+    id
+    Price
+    Tax
+    FinalPrice
+  }
+}
+```
+
+**Resposta esperada:**
+
+```json
+{
+  "data": {
+    "createOrder": {
+      "id": "order-003",
+      "Price": 300,
+      "Tax": 30,
+      "FinalPrice": 330
+    }
+  }
+}
+```
+
+## 🧪 Testes Automatizados
+
+```bash
+# Executar todos os testes
+make test
+
+# Testes com cobertura
+make test-coverage
+
+# Testes por camada
+make test-entity      # Entidades de domínio
+make test-usecase     # Casos de uso
+make test-web         # Handlers HTTP
+make test-events      # Sistema de eventos
+```
 
 ## 🔧 Configuração
 
 ### Variáveis de Ambiente
 
-Crie um arquivo `.env` baseado no `env.example`:
+Copie o arquivo de exemplo:
 
 ```bash
-cp env.example .env
+cp env.example cmd/ordersystem/.env
 ```
 
-Configure as seguintes variáveis:
+Principais configurações:
 
 ```env
-# Database Configuration
+# Database
 DB_DRIVER=mysql
 DB_HOST=localhost
 DB_PORT=3306
@@ -32,174 +171,53 @@ WEB_SERVER_PORT=8080
 GRPC_SERVER_PORT=50051
 GRAPHQL_SERVER_PORT=8082
 
-# RabbitMQ Configuration
+# RabbitMQ
 RABBITMQ_URL=amqp://guest:guest@localhost:5672/
-```
-
-### Dependências
-
-```bash
-# Instalar dependências
-go mod tidy
-
-# Instalar ferramentas
-go install github.com/99designs/gqlgen@latest
-go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
-go install github.com/google/wire/cmd/wire@latest
-```
-
-### Banco de Dados
-
-```sql
-CREATE DATABASE orders;
-CREATE TABLE orders (
-    id varchar(255) NOT NULL,
-    price float NOT NULL,
-    tax float NOT NULL,
-    final_price float NOT NULL,
-    PRIMARY KEY (id)
-);
-```
-
-### RabbitMQ
-
-```bash
-# Usando Docker
-docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management
-```
-
-## 🚀 Execução
-
-```bash
-# Executar a aplicação
-go run ./cmd/ordersystem
-
-# Ou compilar e executar
-go build ./cmd/ordersystem
-./ordersystem
-```
-
-## 📚 APIs
-
-### REST API
-
-#### POST /order
-Criar um novo pedido
-
-```bash
-curl -X POST http://localhost:8080/order \
-  -H "Content-Type: application/json" \
-  -d '{
-    "id": "123",
-    "price": 100.0,
-    "tax": 10.0
-  }'
-```
-
-### gRPC
-
-#### CreateOrder
-```protobuf
-service OrderService {
-  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
-}
-```
-
-### GraphQL
-
-Acesse o playground em: `http://localhost:8082`
-
-#### Mutation
-```graphql
-mutation {
-  createOrder(input: {
-    id: "123"
-    Price: 100.0
-    Tax: 10.0
-  }) {
-    id
-    Price
-    Tax
-    FinalPrice
-  }
-}
-```
-
-## 🧪 Testes
-
-```bash
-# Executar todos os testes
-go test ./... -v
-
-# Executar com cobertura
-go test ./... -cover
-
-# Executar testes específicos
-go test ./internal/entity -v
-go test ./internal/usecase -v
-go test ./internal/infra/web -v
-go test ./events -v
 ```
 
 ## 🏗️ Arquitetura
 
-```
-cmd/
-├── ordersystem/          # Entry point da aplicação
-internal/
-├── entity/               # Entidades de domínio
-├── usecase/              # Casos de uso
-├── infra/                # Infraestrutura
-│   ├── database/         # Repositórios
-│   ├── grpc/            # Serviços gRPC
-│   ├── graph/           # GraphQL resolvers
-│   └── web/             # Handlers HTTP
-└── event/               # Eventos de domínio
-events/                  # Sistema de eventos
-configs/                 # Configurações
-```
+O projeto segue **Clean Architecture** com 3 camadas:
 
-## 🔄 Event-Driven Architecture
+- **Domain** (`internal/entity`): Entidades e regras de negócio
+- **Use Cases** (`internal/usecase`): Lógica de aplicação
+- **Infrastructure** (`internal/infra`): REST, gRPC, GraphQL, Database
 
-O sistema utiliza eventos para comunicação assíncrona:
+Eventos são processados de forma assíncrona via RabbitMQ (`events/`).
 
-- **OrderCreated**: Disparado quando um pedido é criado
-- **RabbitMQ**: Broker de mensagens para processamento assíncrono
-
-## 📝 Documentação
-
-- **Swagger**: Disponível em `/swagger/` (quando implementado)
-- **GraphQL Playground**: `http://localhost:8082`
-- **RabbitMQ Management**: `http://localhost:15672` (guest/guest)
-
-## 🛠️ Desenvolvimento
-
-### Regenerar Código
+## 🛠️ Comandos Úteis
 
 ```bash
-# GraphQL
-gqlgen generate
+# Desenvolvimento
+make run-dev          # Sobe infra + aplicação
+make test             # Roda todos os testes
+make test-coverage    # Testes com cobertura
 
-# gRPC
-protoc --go_out=. --go-grpc_out=. internal/infra/grpc/protofiles/order.proto
+# Infraestrutura
+make docker-up        # Sobe MySQL + RabbitMQ
+make docker-down      # Para containers
+make db-reset         # Reseta banco de dados
 
-# Wire (Dependency Injection)
-wire ./cmd/ordersystem
+# Validação
+make test-http        # Testa REST API
+make test-grpc        # Testa gRPC
+make test-graphql     # Testa GraphQL
+
+# Geração de código
+make proto            # Gera código protobuf
+make graphql          # Gera código GraphQL
+make wire             # Gera injeção de dependências
+
+# Limpeza
+make clean            # Remove binários
+make clean-all        # Remove tudo (binários + containers)
 ```
 
-### Estrutura de Commits
+## 📝 Links Úteis
 
-Seguindo Conventional Commits:
-
-```
-feat: add new feature
-fix: fix bug
-refactor: refactor code
-docs: update documentation
-test: add tests
-chore: maintenance
-```
+- **GraphQL Playground**: <http://localhost:8082>
+- **RabbitMQ Management**: <http://localhost:15672> (guest/guest)
+- **Makefile**: `make help` para ver todos os comandos
 
 ## 📄 Licença
 
