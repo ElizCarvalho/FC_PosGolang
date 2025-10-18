@@ -213,13 +213,13 @@ generate: proto graphql wire ## Gera todo o código (proto, graphql, wire)
 .PHONY: db-create
 db-create: ## Cria o banco de dados
 	@echo "$(BLUE)💾 Criando banco de dados...$(NC)"
-	@docker exec -it mysql mysql -u$(DB_USER) -p$(DB_PASSWORD) -e "CREATE DATABASE IF NOT EXISTS $(DB_NAME);"
+	@docker exec mysql mysql -u$(DB_USER) -p$(DB_PASSWORD) -e "CREATE DATABASE IF NOT EXISTS $(DB_NAME);"
 	@echo "$(GREEN)✅ Banco criado!$(NC)"
 
 .PHONY: db-migrate
 db-migrate: ## Executa as migrations
 	@echo "$(BLUE)💾 Executando migrations...$(NC)"
-	@docker exec -it mysql mysql -u$(DB_USER) -p$(DB_PASSWORD) $(DB_NAME) -e "\
+	@docker exec mysql mysql -u$(DB_USER) -p$(DB_PASSWORD) $(DB_NAME) -e "\
 		CREATE TABLE IF NOT EXISTS orders (\
 			id varchar(255) NOT NULL,\
 			price float NOT NULL,\
@@ -232,7 +232,7 @@ db-migrate: ## Executa as migrations
 .PHONY: db-drop
 db-drop: ## Remove o banco de dados
 	@echo "$(RED)⚠️  Removendo banco de dados...$(NC)"
-	@docker exec -it mysql mysql -u$(DB_USER) -p$(DB_PASSWORD) -e "DROP DATABASE IF EXISTS $(DB_NAME);"
+	@docker exec mysql mysql -u$(DB_USER) -p$(DB_PASSWORD) -e "DROP DATABASE IF EXISTS $(DB_NAME);"
 	@echo "$(GREEN)✅ Banco removido!$(NC)"
 
 .PHONY: db-reset
