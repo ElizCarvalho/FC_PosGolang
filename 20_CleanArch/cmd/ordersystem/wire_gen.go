@@ -13,6 +13,7 @@ import (
 	"github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/entity"
 	"github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/event"
 	"github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/infra/database"
+	"github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/infra/grpc/service"
 	"github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/infra/web"
 	"github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/usecase"
 	"github.com/google/wire"
@@ -38,6 +39,19 @@ func NewWebOrderHandler(db *sql.DB, eventDispatcher events.EventDispatcherInterf
 func NewHealthHandler(db *sql.DB, rabbitMQChannel *amqp.Channel) *web.HealthHandler {
 	healthHandler := web.NewHealthHandler(db, rabbitMQChannel)
 	return healthHandler
+}
+
+func NewOrderService(db *sql.DB, eventDispatcher events.EventDispatcherInterface) *service.OrderService {
+	orderRepository := database.NewOrderRepository(db)
+	orderCreated := event.NewOrderCreated()
+	createOrderUseCase := usecase.NewCreateOrderUseCase(orderRepository, orderCreated, eventDispatcher)
+	orderService := service.NewOrderService(*createOrderUseCase, orderRepository)
+	return orderService
+}
+
+func NewOrderRepository(db *sql.DB) entity.OrderRepositoryInterface {
+	orderRepository := database.NewOrderRepository(db)
+	return orderRepository
 }
 
 // wire.go:

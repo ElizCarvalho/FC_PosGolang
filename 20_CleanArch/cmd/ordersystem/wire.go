@@ -10,6 +10,7 @@ import (
 	"github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/entity"
 	"github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/event"
 	"github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/infra/database"
+	"github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/infra/grpc/service"
 	"github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/infra/web"
 	"github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/usecase"
 	"github.com/google/wire"
@@ -56,4 +57,21 @@ func NewHealthHandler(db *sql.DB, rabbitMQChannel *amqp.Channel) *web.HealthHand
 		web.NewHealthHandler,
 	)
 	return &web.HealthHandler{}
+}
+
+func NewOrderService(db *sql.DB, eventDispatcher events.EventDispatcherInterface) *service.OrderService {
+	wire.Build(
+		setOrderRepositoryDependency,
+		setOrderCreatedEvent,
+		usecase.NewCreateOrderUseCase,
+		service.NewOrderService,
+	)
+	return &service.OrderService{}
+}
+
+func NewOrderRepository(db *sql.DB) entity.OrderRepositoryInterface {
+	wire.Build(
+		setOrderRepositoryDependency,
+	)
+	return &database.OrderRepository{}
 }

@@ -18,7 +18,6 @@ import (
 	"github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/event/handler"
 	"github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/infra/graph"
 	"github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/infra/grpc/pb"
-	"github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/infra/grpc/service"
 	"github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/infra/web/webserver"
 	"github.com/streadway/amqp"
 	"google.golang.org/grpc"
@@ -53,7 +52,8 @@ func main() {
 	// Web Server (REST)
 	webserver := webserver.NewWebServer(configs.WebServerPort)
 	webOrderHandler := NewWebOrderHandler(db, eventDispatcher)
-	webserver.AddHandler("/order", webOrderHandler.Create)
+	webserver.AddHandlerWithMethod("POST", "/order", webOrderHandler.Create)
+	webserver.AddHandlerWithMethod("GET", "/orders", webOrderHandler.List)
 
 	// Health Check
 	healthHandler := NewHealthHandler(db, rabbitMQChannel)
@@ -64,8 +64,8 @@ func main() {
 
 	// gRPC Server
 	grpcServer := grpc.NewServer()
-	createOrderService := service.NewOrderService(*createOrderUseCase)
-	pb.RegisterOrderServiceServer(grpcServer, createOrderService)
+	orderService := NewOrderService(db, eventDispatcher)
+	pb.RegisterOrderServiceServer(grpcServer, orderService)
 	reflection.Register(grpcServer)
 
 	fmt.Println("Starting gRPC server on port", configs.GRPCServerPort)
@@ -80,8 +80,10 @@ func main() {
 	}()
 
 	// GraphQL Server
+	orderRepository := NewOrderRepository(db)
 	srv := graphql_handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
 		CreateOrderUseCase: *createOrderUseCase,
+		OrderRepository:    orderRepository,
 	}}))
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
