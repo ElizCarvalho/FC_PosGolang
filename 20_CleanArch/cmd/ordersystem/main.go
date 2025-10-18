@@ -54,6 +54,11 @@ func main() {
 	webserver := webserver.NewWebServer(configs.WebServerPort)
 	webOrderHandler := NewWebOrderHandler(db, eventDispatcher)
 	webserver.AddHandler("/order", webOrderHandler.Create)
+
+	// Health Check
+	healthHandler := NewHealthHandler(db, rabbitMQChannel)
+	webserver.AddHandler("/health", healthHandler.Check)
+
 	fmt.Println("Starting web server on port", configs.WebServerPort)
 	go webserver.Start()
 
