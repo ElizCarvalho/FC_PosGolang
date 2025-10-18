@@ -13,6 +13,7 @@ import (
 	"github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/infra/web"
 	"github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/usecase"
 	"github.com/google/wire"
+	"github.com/streadway/amqp"
 )
 
 var setOrderRepositoryDependency = wire.NewSet(
@@ -48,4 +49,11 @@ func NewWebOrderHandler(db *sql.DB, eventDispatcher events.EventDispatcherInterf
 		web.NewWebOrderHandler,
 	)
 	return &web.WebOrderHandler{}
+}
+
+func NewHealthHandler(db *sql.DB, rabbitMQChannel *amqp.Channel) *web.HealthHandler {
+	wire.Build(
+		web.NewHealthHandler,
+	)
+	return &web.HealthHandler{}
 }

@@ -16,6 +16,7 @@ import (
 	"github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/infra/web"
 	"github.com/ElizCarvalho/FC_PosGolang/20_CleanArch/internal/usecase"
 	"github.com/google/wire"
+	"github.com/streadway/amqp"
 )
 
 // Injectors from wire.go:
@@ -32,6 +33,11 @@ func NewWebOrderHandler(db *sql.DB, eventDispatcher events.EventDispatcherInterf
 	orderCreated := event.NewOrderCreated()
 	webOrderHandler := web.NewWebOrderHandler(eventDispatcher, orderRepository, orderCreated)
 	return webOrderHandler
+}
+
+func NewHealthHandler(db *sql.DB, rabbitMQChannel *amqp.Channel) *web.HealthHandler {
+	healthHandler := web.NewHealthHandler(db, rabbitMQChannel)
+	return healthHandler
 }
 
 // wire.go:
