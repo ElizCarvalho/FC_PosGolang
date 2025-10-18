@@ -56,7 +56,9 @@ func (c *CreateOrderUseCase) Execute(input OrderInputDTO) (OrderOutputDTO, error
 	}
 
 	c.OrderCreated.SetPayload(dto)
-	c.EventDispatcher.Dispatch(c.OrderCreated)
+	if err := c.EventDispatcher.Dispatch(c.OrderCreated); err != nil {
+		return OrderOutputDTO{}, err
+	}
 
 	return dto, nil
 }

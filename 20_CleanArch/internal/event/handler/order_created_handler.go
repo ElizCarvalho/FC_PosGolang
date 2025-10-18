@@ -29,11 +29,13 @@ func (h *OrderCreatedHandler) Handle(event events.EventInterface, wg *sync.WaitG
 		Body:        jsonOutput,
 	}
 
-	h.RabbitMQChannel.Publish(
+	if err := h.RabbitMQChannel.Publish(
 		"amq.direct", // exchange
 		"",           // key name
 		false,        // mandatory
 		false,        // immediate
 		msgRabbitmq,  // message to publish
-	)
+	); err != nil {
+		fmt.Printf("Error publishing to RabbitMQ: %v\n", err)
+	}
 }
