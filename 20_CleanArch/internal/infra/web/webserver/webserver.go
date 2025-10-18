@@ -38,5 +38,7 @@ func (s *WebServer) Start() {
 	if port[0] != ':' {
 		port = ":" + port
 	}
-	http.ListenAndServe(port, s.Router)
+	if err := http.ListenAndServe(port, s.Router); err != nil {
+		panic(err)
+	}
 }
