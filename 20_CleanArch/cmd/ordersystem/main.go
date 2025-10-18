@@ -1,10 +1,15 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	graphql_handler "github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -33,13 +38,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer func() {
-		if err := db.Close(); err != nil {
-			fmt.Printf("Error closing database: %v\n", err)
-		}
-	}()
 
-	rabbitMQChannel := getRabbitMQChannel(configs.RabbitMQURL)
+	rabbitMQConn, rabbitMQChannel := getRabbitMQChannel(configs.RabbitMQURL)
 
 	eventDispatcher := events.NewEventDispatcher()
 	if err := eventDispatcher.Register("OrderCreated", &handler.OrderCreatedHandler{
@@ -50,12 +50,14 @@ func main() {
 
 	createOrderUseCase := NewCreateOrderUseCase(db, eventDispatcher)
 
+	// Web Server (REST)
 	webserver := webserver.NewWebServer(configs.WebServerPort)
 	webOrderHandler := NewWebOrderHandler(db, eventDispatcher)
 	webserver.AddHandler("/order", webOrderHandler.Create)
 	fmt.Println("Starting web server on port", configs.WebServerPort)
 	go webserver.Start()
 
+	// gRPC Server
 	grpcServer := grpc.NewServer()
 	createOrderService := service.NewOrderService(*createOrderUseCase)
 	pb.RegisterOrderServiceServer(grpcServer, createOrderService)
@@ -72,19 +74,65 @@ func main() {
 		}
 	}()
 
+	// GraphQL Server
 	srv := graphql_handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
 		CreateOrderUseCase: *createOrderUseCase,
 	}}))
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
 
-	fmt.Println("Starting GraphQL server on port", configs.GraphQLServerPort)
-	if err := http.ListenAndServe(":"+configs.GraphQLServerPort, nil); err != nil {
-		panic(err)
+	graphqlServer := &http.Server{
+		Addr:    ":" + configs.GraphQLServerPort,
+		Handler: nil,
 	}
+
+	fmt.Println("Starting GraphQL server on port", configs.GraphQLServerPort)
+	go func() {
+		if err := graphqlServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			fmt.Printf("Error starting GraphQL server: %v\n", err)
+		}
+	}()
+
+	// Graceful Shutdown
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	fmt.Println("\nShutting down servers gracefully...")
+
+	// Timeout para shutdown
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Shutdown GraphQL server
+	fmt.Println("Shutting down GraphQL server...")
+	if err := graphqlServer.Shutdown(ctx); err != nil {
+		fmt.Printf("GraphQL server forced to shutdown: %v\n", err)
+	}
+
+	// Shutdown gRPC server
+	fmt.Println("Shutting down gRPC server...")
+	grpcServer.GracefulStop()
+
+	// Close RabbitMQ
+	fmt.Println("Closing RabbitMQ connection...")
+	if err := rabbitMQChannel.Close(); err != nil {
+		fmt.Printf("Error closing RabbitMQ channel: %v\n", err)
+	}
+	if err := rabbitMQConn.Close(); err != nil {
+		fmt.Printf("Error closing RabbitMQ connection: %v\n", err)
+	}
+
+	// Close database
+	fmt.Println("Closing database connection...")
+	if err := db.Close(); err != nil {
+		fmt.Printf("Error closing database: %v\n", err)
+	}
+
+	fmt.Println("Shutdown complete")
 }
 
-func getRabbitMQChannel(rabbitMQURL string) *amqp.Channel {
+func getRabbitMQChannel(rabbitMQURL string) (*amqp.Connection, *amqp.Channel) {
 	conn, err := amqp.Dial(rabbitMQURL)
 	if err != nil {
 		panic(err)
@@ -93,5 +141,5 @@ func getRabbitMQChannel(rabbitMQURL string) *amqp.Channel {
 	if err != nil {
 		panic(err)
 	}
-	return ch
+	return conn, ch
 }
