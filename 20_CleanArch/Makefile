@@ -77,14 +77,8 @@ db-create: ## Cria banco de dados
 
 .PHONY: db-migrate
 db-migrate: ## Executa migrations
-	@docker exec mysql mysql -u$(DB_USER) -p$(DB_PASSWORD) $(DB_NAME) -e "\
-		CREATE TABLE IF NOT EXISTS orders (\
-			id varchar(255) NOT NULL,\
-			price float NOT NULL,\
-			tax float NOT NULL,\
-			final_price float NOT NULL,\
-			PRIMARY KEY (id)\
-		);"
+	@echo "$(BLUE)📦 Executando migrations...$(NC)"
+	@docker exec -i mysql mysql -u$(DB_USER) -p$(DB_PASSWORD) $(DB_NAME) < sql/migrations/001_create_orders_table.sql
 	@echo "$(GREEN)✅ Migrations executadas!$(NC)"
 
 .PHONY: db-reset
