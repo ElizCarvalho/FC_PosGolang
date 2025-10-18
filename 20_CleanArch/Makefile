@@ -257,12 +257,12 @@ test-grpc: ## Testa endpoint gRPC (requer grpcurl)
 		echo "$(YELLOW)⚠️  Instale grpcurl: make setup-tools$(NC)"
 
 .PHONY: test-graphql
-test-graphql: ## Abre o GraphQL Playground
-	@echo "$(BLUE)🧪 Abrindo GraphQL Playground...$(NC)"
-	@echo "$(YELLOW)Acesse: http://localhost:$(GRAPHQL_PORT)$(NC)"
-	@open http://localhost:$(GRAPHQL_PORT) 2>/dev/null || \
-		xdg-open http://localhost:$(GRAPHQL_PORT) 2>/dev/null || \
-		echo "$(YELLOW)Abra manualmente: http://localhost:$(GRAPHQL_PORT)$(NC)"
+test-graphql: ## Testa GraphQL via curl
+	@echo "$(BLUE)🧪 Testando endpoint GraphQL...$(NC)"
+	@curl -X POST http://localhost:$(GRAPHQL_PORT)/query \
+		-H "Content-Type: application/json" \
+		-d '{"query":"mutation { createOrder(input: {id: \"test-'$$(date +%s)'\", Price: 100.0, Tax: 10.0}) { id Price Tax FinalPrice } }"}' \
+		-s | jq '.' || echo "$(RED)❌ Erro: Certifique-se que a aplicação está rodando$(NC)"
 
 # ==============================================================================
 # Comandos de Limpeza
