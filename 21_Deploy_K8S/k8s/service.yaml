@@ -5,7 +5,7 @@ metadata:
   labels:
     app: goapp
 spec:
-  type: NodePort #LoadBalancer, ClusterIP, NodePort
+  type: LoadBalancer #LoadBalancer, ClusterIP, NodePort
   ports:
   - port: 8080
     targetPort: 8080
