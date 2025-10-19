@@ -18,11 +18,6 @@ spec:
       - name: goapp
         image: goapp:latest
         imagePullPolicy: Never
-        ports:
-        - containerPort: 8080
-        env:
-        - name: PORT
-          value: "8080"
         resources:
           requests:
             memory: "32Mi"
@@ -30,3 +25,35 @@ spec:
           limits:
             memory: "64Mi" #64Mi são 64 megabytes
             cpu: "200m" #200 milicores = 0.2 cores = 0.2% do core
+        
+        #startup probe é usado para verificar se o pod está pronto para iniciar
+        startupProbe:
+          httpGet:
+            path: /
+            port: 8080
+          periodSeconds: 10 # espera 10 segundos para verificar se o pod está pronto
+          failureThreshold: 10 # se o pod falhar 10 vezes, o pod é considerado falho
+
+        #readiness probe é usado para verificar se o pod está pronto para receber tráfego
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          periodSeconds: 10 # espera 10 segundos para verificar se o pod está pronto
+          failureThreshold: 2 # se o pod falhar 2 vezes, o pod é considerado falho
+          timeoutSeconds: 5 # se o pod demorar 5 segundos para responder, o pod é considerado falho
+
+        #liveness probe é usado para verificar se o pod está vivo e funcionando e se o nao estiver entao ele reinicia o pod
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          periodSeconds: 10 # espera 10 segundos para verificar se o pod está pronto
+          failureThreshold: 3 # se o pod falhar 3 vezes, o pod é considerado falho
+          timeoutSeconds: 5 # se o pod demorar 5 segundos para responder, o pod é considerado falho
+          successThreshold: 1 # se o pod responder 1 vez, o pod é considerado vivo
+
+        ports:
+        - containerPort: 8080
+
+
