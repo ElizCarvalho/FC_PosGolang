@@ -16,6 +16,27 @@ YELLOW=\033[0;33m
 NC=\033[0m
 
 # ==============================================================================
+# Comandos Principais
+# ==============================================================================
+.PHONY: up
+up: ## Executa tudo (Docker Compose)
+	@echo "$(BLUE)🚀 Iniciando aplicação completa...$(NC)"
+	@docker-compose up -d
+	@echo "$(GREEN)✅ Aplicação executando!$(NC)"
+
+.PHONY: down
+down: ## Para todos os containers
+	@echo "$(BLUE)🛑 Parando containers...$(NC)"
+	@docker-compose down
+	@echo "$(GREEN)✅ Containers parados!$(NC)"
+
+.PHONY: dev
+dev: ## Desenvolvimento local (infra + app)
+	@echo "$(BLUE)🔧 Modo desenvolvimento...$(NC)"
+	@$(MAKE) docker-up
+	@$(MAKE) run
+
+# ==============================================================================
 # Setup e Desenvolvimento
 # ==============================================================================
 .PHONY: setup
@@ -105,47 +126,46 @@ graphql: ## Gera código GraphQL
 generate: proto graphql ## Gera código protobuf e GraphQL
 
 # ==============================================================================
-# Testes Manuais
+# Testes Rápidos
 # ==============================================================================
-.PHONY: test-http
-test-http: ## Testa criação via REST
+.PHONY: test-api
+test-api: ## Testa todas as APIs
+	@echo "$(BLUE)🧪 Testando APIs...$(NC)"
+	@echo "$(YELLOW)Health Check:$(NC)"
+	@curl -s http://localhost:$(WEB_PORT)/health | jq '.'
+	@echo "\n$(YELLOW)Criando pedido via REST:$(NC)"
+	@curl -X POST http://localhost:$(WEB_PORT)/order \
+		-H "Content-Type: application/json" \
+		-d '{"id":"test-'$$(date +%s)'","price":100.0,"tax":10.0}' | jq '.'
+	@echo "\n$(YELLOW)Listando pedidos:$(NC)"
+	@curl -s http://localhost:$(WEB_PORT)/orders | jq '.'
+
+.PHONY: test-rest
+test-rest: ## Testa apenas REST API
 	@curl -X POST http://localhost:$(WEB_PORT)/order \
 		-H "Content-Type: application/json" \
 		-d '{"id":"test-'$$(date +%s)'","price":100.0,"tax":10.0}'
 
-.PHONY: test-http-list
-test-http-list: ## Testa listagem via REST
-	@curl http://localhost:$(WEB_PORT)/orders -s | jq '.'
-
 .PHONY: test-grpc
-test-grpc: ## Testa criação via gRPC
+test-grpc: ## Testa gRPC
+	@echo "$(BLUE)🧪 Testando gRPC...$(NC)"
 	@grpcurl -plaintext -d '{"id":"test-'$$(date +%s)'","price":100.0,"tax":10.0}' \
 		localhost:$(GRPC_PORT) pb.OrderService/CreateOrder
 
-.PHONY: test-grpc-list
-test-grpc-list: ## Testa listagem via gRPC
-	@grpcurl -plaintext localhost:$(GRPC_PORT) pb.OrderService/ListOrders
-
 .PHONY: test-graphql
-test-graphql: ## Testa criação via GraphQL
+test-graphql: ## Testa GraphQL
+	@echo "$(BLUE)🧪 Testando GraphQL...$(NC)"
 	@curl -X POST http://localhost:$(GRAPHQL_PORT)/query \
 		-H "Content-Type: application/json" \
 		-d '{"query":"mutation { createOrder(input: {id: \"test-'$$(date +%s)'\", Price: 100.0, Tax: 10.0}) { id Price Tax FinalPrice } }"}' \
 		-s | jq '.'
 
-.PHONY: test-graphql-list
-test-graphql-list: ## Testa listagem via GraphQL
-	@curl -X POST http://localhost:$(GRAPHQL_PORT)/query \
-		-H "Content-Type: application/json" \
-		-d '{"query":"query { listOrders { id Price Tax FinalPrice } }"}' \
-		-s | jq '.'
-
-.PHONY: test-all-list
-test-all-list: ## Testa listagem em todas interfaces
-	@echo "$(BLUE)🧪 Testando listagem...$(NC)"
-	@echo "\n$(YELLOW)REST:$(NC)" && $(MAKE) test-http-list
-	@echo "\n$(YELLOW)gRPC:$(NC)" && $(MAKE) test-grpc-list
-	@echo "\n$(YELLOW)GraphQL:$(NC)" && $(MAKE) test-graphql-list
+.PHONY: test-all
+test-all: ## Testa todas as interfaces
+	@echo "$(BLUE)🧪 Testando todas as interfaces...$(NC)"
+	@echo "\n$(YELLOW)REST:$(NC)" && $(MAKE) test-rest
+	@echo "\n$(YELLOW)gRPC:$(NC)" && $(MAKE) test-grpc
+	@echo "\n$(YELLOW)GraphQL:$(NC)" && $(MAKE) test-graphql
 
 # ==============================================================================
 # Utilitários
