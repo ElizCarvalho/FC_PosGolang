@@ -163,9 +163,18 @@ test-graphql: ## Testa GraphQL
 .PHONY: test-all
 test-all: ## Testa todas as interfaces
 	@echo "$(BLUE)🧪 Testando todas as interfaces...$(NC)"
-	@echo "\n$(YELLOW)REST:$(NC)" && $(MAKE) test-rest
-	@echo "\n$(YELLOW)gRPC:$(NC)" && $(MAKE) test-grpc
-	@echo "\n$(YELLOW)GraphQL:$(NC)" && $(MAKE) test-graphql
+	@echo "\n$(YELLOW)REST:$(NC)"
+	@curl -X POST http://localhost:$(WEB_PORT)/order \
+		-H "Content-Type: application/json" \
+		-d '{"id":"test-all-'$$(date +%s)'","price":100.0,"tax":10.0}' | jq '.'
+	@echo "\n$(YELLOW)gRPC:$(NC)"
+	@grpcurl -plaintext -d '{"id":"test-grpc-'$$(date +%s)'","price":100.0,"tax":10.0}' \
+		localhost:$(GRPC_PORT) pb.OrderService/CreateOrder
+	@echo "\n$(YELLOW)GraphQL:$(NC)"
+	@curl -X POST http://localhost:$(GRAPHQL_PORT)/query \
+		-H "Content-Type: application/json" \
+		-d '{"query":"mutation { createOrder(input: {id: \"test-gql-'$$(date +%s)'\", Price: 100.0, Tax: 10.0}) { id Price Tax FinalPrice } }"}' \
+		-s | jq '.'
 
 # ==============================================================================
 # Utilitários
